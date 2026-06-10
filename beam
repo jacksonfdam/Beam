@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 #
-# Beam dev console — an interactive REPL to set up and run the whole monorepo.
+# Beam dev console — set up and run the whole monorepo. Zero-config:
 #
-#   ./beam            # interactive console (type `help`)
-#   ./beam <command>  # run one command and exit (e.g. ./beam web)
+#   ./beam            # checks deps, installs, starts the web dev server, opens the console
+#   ./beam <command>  # run one command and exit (e.g. ./beam build)
 #
-# Commands: setup · web · desktop [hot] · android · ios · status · logs <name>
-#           stop [web|desktop|all] · help · quit
+# Commands: setup · web · build · desktop [hot] · android · ios · status
+#           logs <name> · stop [web|desktop|all] · help · quit
 #
 # Long-running things (web dev server, desktop app) run in the background with
-# PIDs and logs under .dev/. One-shot things (android/ios install) run in the
-# foreground so you see the build output.
+# PIDs and logs under .dev/. One-shot things (build, android/ios install) run in
+# the foreground so you see the output.
 
 set -uo pipefail
 
@@ -83,12 +83,19 @@ cmd_setup(){
   have adb && ok "adb present ($(adb_serials | wc -l | tr -d ' ') device(s))" || warn "adb not found — Android install will be unavailable."
   have xcodebuild && ok "Xcode CLI present" || warn "xcodebuild not found — iOS install will be unavailable (macOS + Xcode only)."
 
-  if [ -d "$WEB/node_modules" ]; then ok "web deps already installed."
-  elif have npm; then info "Installing web deps (npm install)…"; ( cd "$WEB" && npm install ) && ok "web deps installed." || err "npm install failed."
+  if have npm; then
+    info "Installing web dependencies (npm install)…"
+    ( cd "$WEB" && npm install ) && ok "web dependencies ready." || err "npm install failed."
   fi
 
-  if [ -x "$MOBILE/gradlew" ]; then info "Warming the Gradle wrapper…"; ( cd "$MOBILE" && ./gradlew --version >/dev/null 2>&1 ) && ok "Gradle ready." || warn "Gradle warmup failed — check JDK."; fi
   ok "Setup complete."
+}
+
+cmd_build(){
+  have npm || { err "npm not found."; return 1; }
+  [ -d "$WEB/node_modules" ] || ( cd "$WEB" && npm install )
+  info "Building the web app for production (npm run build)…"
+  ( cd "$WEB" && npm run build ) && ok "Build complete (web/.next)." || err "Build failed."
 }
 
 cmd_web(){
@@ -178,10 +185,12 @@ cmd_stop(){ # [web|desktop|all]
 
 print_help(){
   cat <<EOF
-${B}Beam dev console${X}  ${D}(type a command)${X}
+${B}Beam dev console${X}  ${D}(just run ./beam — it sets up and starts the web for you)${X}
 
-  ${G}setup${X}              Check tools, install web deps, warm Gradle
+  ${G}up${X}                 Set up + start the web dev server ${D}(this is the default)${X}
+  ${G}setup${X}              Check tools and install web dependencies
   ${G}web${X}                Start the Next.js dev server (background)
+  ${G}build${X}              Production build of the web app (npm run build)
   ${G}desktop${X} [${C}hot${X}]      Free :$PORT, stop daemons, run the desktop host
                      ${D}(default: run · 'desktop hot' tries hotRun --auto)${X}
   ${G}android${X}            Build + install + launch the Android remote (adb)
@@ -198,7 +207,9 @@ dispatch(){
   local c="${1:-}"; shift || true
   case "$c" in
     setup) cmd_setup ;;
+    up|start) cmd_setup; printf "\n"; cmd_web ;;
     web) cmd_web ;;
+    build) cmd_build ;;
     web:stop) cmd_stop web ;;
     desktop|desk) cmd_desktop "${1:-}" ;;
     hot) cmd_desktop hot ;;
@@ -233,4 +244,12 @@ repl(){
 }
 
 # ---- entry ----------------------------------------------------------------
-if [ "$#" -gt 0 ]; then dispatch "$@"; else repl; fi
+if [ "$#" -gt 0 ]; then
+  dispatch "$@"
+else
+  # Zero-config: verify + install deps, start the web dev server, open the console.
+  cmd_setup
+  printf "\n"
+  cmd_web
+  repl
+fi

@@ -58,19 +58,20 @@ host ↔ native Android/iOS remote over Wi‑Fi**. The browser remote has a cave
 
 ## Dev console (`beam`)
 
-The quickest way in is `./beam`, an interactive console that sets things up and
-runs each surface:
+Zero-config — just run it. `./beam` verifies your tools, installs the web
+dependencies, starts the Next.js dev server, and drops you into a small console
+for everything else:
 
 ```bash
-./beam            # interactive — type `help`
-./beam web        # or run a single command and exit
+./beam            # set up + start the web, then open the console
+./beam build      # or run one command and exit (e.g. a production web build)
 ```
 
-It offers `setup` (tools + web deps + Gradle warmup), `web` (Next.js dev
-server), `desktop` (frees `:53317`, stops stale daemons, runs the host),
-`android` / `ios` (build + install on a connected device), plus `status`,
-`logs`, and `stop`. Background processes keep their PIDs and logs under `.dev/`.
-The manual commands below are what each console action runs under the hood.
+From the console: `up` (set up + start the web), `build` (production web build),
+`desktop` (frees `:53317`, stops stale daemons, runs the host), `android` /
+`ios` (build + install on a connected device), plus `status`, `logs`, and
+`stop`. Background processes keep their PIDs and logs under `.dev/`; the manual
+commands below are what each action runs under the hood.
 
 ## Prerequisites
 
