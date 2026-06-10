@@ -13,6 +13,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        // The launcher uses the splash theme; switch to the normal app theme now.
+        setTheme(R.style.Theme_Beam)
 
         val store = AndroidConnectionStore(applicationContext)
         setContent {

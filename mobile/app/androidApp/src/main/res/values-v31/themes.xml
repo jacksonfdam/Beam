@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ system splash screen. -->
+    <style name="Theme.Beam.Splash" parent="Theme.Beam">
+        <item name="android:windowSplashScreenBackground">@color/beam_ink</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/beam_ink</item>
+    </style>
+</resources>

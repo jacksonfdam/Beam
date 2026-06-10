@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/beam_ink" />
+    <item android:gravity="center"
+        android:width="180dp" android:height="180dp"
+        android:drawable="@drawable/splash_logo" />
+</layer-list>

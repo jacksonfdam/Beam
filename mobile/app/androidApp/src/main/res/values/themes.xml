@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Beam" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/beam_ink</item>
+    </style>
+    <!-- Launcher theme: shown until the first frame (pre-Android 12 fallback). -->
+    <style name="Theme.Beam.Splash" parent="Theme.Beam">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+</resources>
