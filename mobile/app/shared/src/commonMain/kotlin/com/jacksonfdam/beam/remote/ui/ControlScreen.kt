@@ -1,12 +1,17 @@
 package com.jacksonfdam.beam.remote.ui
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -21,6 +26,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.jacksonfdam.beam.protocol.NavAction
@@ -38,15 +47,35 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
     ) {
         ConnectedHeader(controller)
 
+        presentation.slideImage?.let { SlidePreview(it) }
+
         SlideIndicator(presentation.index, presentation.total)
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            Button(onClick = { controller.nav(NavAction.PREV) }, modifier = Modifier.weight(1f)) { Text("‹ Prev") }
-            Button(onClick = { controller.nav(NavAction.NEXT) }, modifier = Modifier.weight(1f)) { Text("Next ›") }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Button(
+                onClick = { controller.nav(NavAction.PREV) },
+                modifier = Modifier.weight(1f)
+            ) { Text("‹ Prev") }
+            Button(
+                onClick = { controller.nav(NavAction.NEXT) },
+                modifier = Modifier.weight(1f)
+            ) { Text("Next ›") }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            OutlinedButton(onClick = { controller.nav(NavAction.FIRST) }, modifier = Modifier.weight(1f)) { Text("First") }
-            OutlinedButton(onClick = { controller.nav(NavAction.LAST) }, modifier = Modifier.weight(1f)) { Text("Last") }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            OutlinedButton(
+                onClick = { controller.nav(NavAction.FIRST) },
+                modifier = Modifier.weight(1f)
+            ) { Text("First") }
+            OutlinedButton(
+                onClick = { controller.nav(NavAction.LAST) },
+                modifier = Modifier.weight(1f)
+            ) { Text("Last") }
         }
 
         NotesCard(presentation.notes, presentation.hasNotes)
@@ -56,7 +85,33 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
             Text(if (showDrawing) "Hide drawing" else "Draw on the slide")
         }
         if (showDrawing) {
-            DrawingSurface(controller, modifier = Modifier.fillMaxWidth())
+            DrawingSurface(
+                controller = controller,
+                slide = presentation.slideImage,
+                slideKey = presentation.index,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SlidePreview(image: ImageBitmap) {
+    Card(Modifier.fillMaxWidth()) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(image.width.toFloat() / image.height.toFloat())
+                .clip(RoundedCornerShape(6.dp))
+                .background(Color.Black),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                bitmap = image,
+                contentDescription = "Current slide",
+                modifier = Modifier.fillMaxWidth(),
+                contentScale = ContentScale.Fit,
+            )
         }
     }
 }
@@ -64,13 +119,20 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
 @Composable
 private fun SlideIndicator(index: Int, total: Int) {
     Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.fillMaxWidth().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier.fillMaxWidth().padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 text = if (total > 0) "${index + 1} / $total" else "0 / 0",
                 style = MaterialTheme.typography.displaySmall,
                 textAlign = TextAlign.Center,
             )
-            Text("Slide", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                "Slide",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -79,9 +141,14 @@ private fun SlideIndicator(index: Int, total: Int) {
 private fun NotesCard(notes: String?, hasNotes: Boolean) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Speaker notes", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(
-                notes ?: if (hasNotes) "No notes for this slide." else "This deck has no notes sidecar.",
+                "Speaker notes",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                notes
+                    ?: if (hasNotes) "No notes for this slide." else "This deck has no notes sidecar.",
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
@@ -93,7 +160,11 @@ private fun TimerCard(elapsedMs: Long, running: Boolean, controller: RemoteContr
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Timer", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    "Timer",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Text(
                     formatElapsed(elapsedMs),
                     style = MaterialTheme.typography.headlineMedium,
@@ -101,12 +172,18 @@ private fun TimerCard(elapsedMs: Long, running: Boolean, controller: RemoteContr
                     textAlign = TextAlign.End,
                 )
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 OutlinedButton(
                     onClick = { controller.timer(if (running) TimerAction.PAUSE else TimerAction.START) },
                     modifier = Modifier.weight(1f),
                 ) { Text(if (running) "Pause" else "Start") }
-                OutlinedButton(onClick = { controller.timer(TimerAction.RESET) }, modifier = Modifier.weight(1f)) { Text("Reset") }
+                OutlinedButton(
+                    onClick = { controller.timer(TimerAction.RESET) },
+                    modifier = Modifier.weight(1f)
+                ) { Text("Reset") }
             }
         }
     }
