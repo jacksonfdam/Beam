@@ -32,6 +32,8 @@ const clientMessages: ClientMessage[] = [
   ClientMsg.ping(),
   ClientMsg.setMode("SLIDES"),
   ClientMsg.setMode("SCREEN"),
+  ClientMsg.setInteracting(true),
+  ClientMsg.spotlight(0.1, 0.2, 0.6, 0.7),
 ];
 
 // Every host->client message.
@@ -41,6 +43,7 @@ const hostMessages: HostMessage[] = [
     sessionName: "Jackson's Mac",
     hostVersion: "1.0.0",
     decks: [{ id: "d1", title: "Talk", slideCount: 12, hasNotes: true }],
+    screenAspect: 1.7778,
   },
   { type: "hello_reject", reason: "bad pin" },
   { type: "deck_selected", deckId: "d1", slideCount: 12, hasNotes: false },

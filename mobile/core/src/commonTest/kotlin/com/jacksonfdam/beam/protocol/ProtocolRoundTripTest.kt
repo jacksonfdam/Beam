@@ -27,6 +27,8 @@ class ProtocolRoundTripTest {
         Ping,
         SetMode(PresentMode.SLIDES),
         SetMode(PresentMode.SCREEN),
+        SetInteracting(true),
+        Spotlight(0.1f, 0.2f, 0.6f, 0.7f),
     )
 
     private val hostMessages: List<HostMessage> = listOf(

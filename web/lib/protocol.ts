@@ -122,6 +122,19 @@ export interface SetMode {
   mode: PresentMode;
 }
 
+export interface SetInteracting {
+  type: "set_interacting";
+  interacting: boolean;
+}
+
+export interface Spotlight {
+  type: "spotlight";
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
 export type ClientMessage =
   | Hello
   | SelectDeck
@@ -133,7 +146,9 @@ export type ClientMessage =
   | ClearInk
   | TimerCmd
   | Ping
-  | SetMode;
+  | SetMode
+  | SetInteracting
+  | Spotlight;
 
 // ---------------------------------------------------------------------------
 // Host -> Client
@@ -144,6 +159,7 @@ export interface HelloAck {
   sessionName: string;
   hostVersion: string;
   decks: DeckInfo[];
+  screenAspect: number;
 }
 
 export interface HelloReject {
@@ -248,6 +264,12 @@ export const ClientMsg = {
   setMode(mode: PresentMode): SetMode {
     return { type: "set_mode", mode };
   },
+  setInteracting(interacting: boolean): SetInteracting {
+    return { type: "set_interacting", interacting };
+  },
+  spotlight(left: number, top: number, right: number, bottom: number): Spotlight {
+    return { type: "spotlight", left, top, right, bottom };
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -266,6 +288,8 @@ const CLIENT_TYPES: ReadonlySet<string> = new Set([
   "timer",
   "ping",
   "set_mode",
+  "set_interacting",
+  "spotlight",
 ]);
 
 const HOST_TYPES: ReadonlySet<string> = new Set([

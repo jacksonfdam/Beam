@@ -80,6 +80,23 @@ enum class PresentMode { SLIDES, SCREEN }
 @SerialName("set_mode")
 data class SetMode(val mode: PresentMode) : ClientMessage
 
+// In SCREEN mode, toggle whether the host's annotation overlay is shown. When
+// interacting, the overlay hides so the presenter can click the live demo.
+@Serializable
+@SerialName("set_interacting")
+data class SetInteracting(val interacting: Boolean) : ClientMessage
+
+// Spotlight a region of the screen (normalized 0..1): the host dims everything
+// outside the rect for a few seconds. A zero-area rect clears it.
+@Serializable
+@SerialName("spotlight")
+data class Spotlight(
+    val left: Float,
+    val top: Float,
+    val right: Float,
+    val bottom: Float,
+) : ClientMessage
+
 // ---------------------------------------------------------------------------
 // Host -> Client
 // ---------------------------------------------------------------------------
@@ -93,6 +110,7 @@ data class HelloAck(
     val sessionName: String,
     val hostVersion: String,
     val decks: List<DeckInfo>,
+    val screenAspect: Float = 16f / 9f,
 ) : HostMessage
 
 @Serializable
