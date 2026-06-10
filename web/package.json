@@ -2,6 +2,7 @@
   "name": "beam-web",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Beam web layer: landing page + browser remote + WebRTC signaling.",
   "scripts": {
     "dev": "next dev",
