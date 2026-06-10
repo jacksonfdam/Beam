@@ -2,8 +2,8 @@
 #
 # Beam dev console — an interactive REPL to set up and run the whole monorepo.
 #
-#   ./dev.sh            # interactive console (type `help`)
-#   ./dev.sh <command>  # run one command and exit (e.g. ./dev.sh web)
+#   ./beam            # interactive console (type `help`)
+#   ./beam <command>  # run one command and exit (e.g. ./beam web)
 #
 # Commands: setup · web · desktop [hot] · android · ios · status · logs <name>
 #           stop [web|desktop|all] · help · quit
