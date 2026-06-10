@@ -8,9 +8,13 @@ plugins {
 
 dependencies {
     implementation(projects.app.shared)
+    implementation(projects.core)
+    implementation(projects.transport)
+    implementation(projects.pdf)
 
     implementation(compose.desktop.currentOs)
     implementation(libs.kotlinx.coroutinesSwing)
+    implementation(libs.qrose)
 
     implementation(libs.compose.uiToolingPreview)
 }
