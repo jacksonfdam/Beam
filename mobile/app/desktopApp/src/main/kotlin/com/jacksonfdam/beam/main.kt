@@ -21,6 +21,7 @@ import com.jacksonfdam.beam.host.HostSession
 import com.jacksonfdam.beam.presenter.InkOverlayScreen
 import com.jacksonfdam.beam.presenter.PresenterControlScreen
 import com.jacksonfdam.beam.presenter.ProjectorScreen
+import com.jacksonfdam.beam.presenter.ScreenCapture
 import com.jacksonfdam.beam.presenter.SlideImages
 import com.jacksonfdam.beam.presenter.SlidePng
 import com.jacksonfdam.beam.protocol.DEFAULT_PORT
@@ -54,6 +55,7 @@ fun main() = application {
             sessionName = hostName(),
             encodeSlide = { document, index -> SlidePng.encode(document, index) },
             screenAspect = screenAspect(),
+            captureScreen = { ScreenCapture.capture(targetScreenBounds()) },
         )
         s
     }

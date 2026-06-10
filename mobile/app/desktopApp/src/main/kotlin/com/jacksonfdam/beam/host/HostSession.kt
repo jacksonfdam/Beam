@@ -19,6 +19,7 @@ import com.jacksonfdam.beam.protocol.SetInteracting
 import com.jacksonfdam.beam.protocol.SetMode
 import com.jacksonfdam.beam.protocol.Spotlight
 import com.jacksonfdam.beam.pdf.PdfDocument
+import com.jacksonfdam.beam.protocol.ScreenImage
 import com.jacksonfdam.beam.protocol.SlideChanged
 import com.jacksonfdam.beam.protocol.SlideImage
 import com.jacksonfdam.beam.protocol.StrokeEnd
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 const val HOST_VERSION = "1.0.0"
+private const val SCREEN_CAPTURE_INTERVAL_MS = 1500L
 
 /**
  * The host's single source of truth. It binds the [PresenterServer], reacts to
@@ -50,6 +52,7 @@ class HostSession(
     val sessionName: String,
     private val encodeSlide: (PdfDocument, Int) -> String? = { _, _ -> null },
     private val screenAspect: Float = 16f / 9f,
+    private val captureScreen: () -> String? = { null },
 ) {
     private val decks = LinkedHashMap<String, HostDeck>()
     private val strokes = LinkedHashMap<Long, InkStroke>()
@@ -143,6 +146,23 @@ class HostSession(
         if (_state.value.presentMode == mode) return
         _state.update { it.copy(presentMode = mode) }
         server.broadcast(ModeChanged(mode))
+        updateScreenCapture()
+    }
+
+    private var captureJob: Job? = null
+
+    /** Stream periodic screen snapshots to remotes while in SCREEN mode. */
+    private fun updateScreenCapture() {
+        captureJob?.cancel()
+        captureJob = null
+        if (_state.value.presentMode == PresentMode.SCREEN) {
+            captureJob = scope.launch {
+                while (true) {
+                    captureScreen()?.let { server.broadcast(ScreenImage(it)) }
+                    delay(SCREEN_CAPTURE_INTERVAL_MS)
+                }
+            }
+        }
     }
 
     private suspend fun selectDeck(id: String) {
