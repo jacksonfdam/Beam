@@ -20,7 +20,10 @@ import com.jacksonfdam.beam.remote.RemoteController
 
 @Composable
 fun DeckPickerScreen(presentation: Presentation, controller: RemoteController) {
-    Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(
+        Modifier.fillMaxSize().padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         ConnectedHeader(controller)
         Text("Choose a deck", style = MaterialTheme.typography.titleLarge)
 

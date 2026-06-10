@@ -19,7 +19,10 @@ import com.jacksonfdam.beam.remote.RemoteController
 
 @Composable
 fun ConnectedHeader(controller: RemoteController) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Box(Modifier.size(10.dp).clip(CircleShape).background(Color(0xFF34D399)))
         Text("Connected", style = MaterialTheme.typography.bodyMedium)
         Box(Modifier.weight(1f))
