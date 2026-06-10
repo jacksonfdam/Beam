@@ -47,6 +47,7 @@ const hostMessages: HostMessage[] = [
   { type: "timer_state", elapsedMs: 4200, running: true },
   { type: "pong" },
   { type: "error", message: "boom" },
+  { type: "slide_image", index: 2, pngBase64: "iVBORw0KGgo=" },
 ];
 
 describe("protocol round-trip", () => {

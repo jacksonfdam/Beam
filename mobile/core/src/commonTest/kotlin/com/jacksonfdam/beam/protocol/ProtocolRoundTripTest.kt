@@ -40,6 +40,7 @@ class ProtocolRoundTripTest {
         TimerState(elapsedMs = 4200L, running = true),
         Pong,
         HostError(message = "boom"),
+        SlideImage(index = 2, pngBase64 = "iVBORw0KGgo="),
     )
 
     @Test

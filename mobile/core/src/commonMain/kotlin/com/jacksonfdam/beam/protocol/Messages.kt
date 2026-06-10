@@ -119,3 +119,9 @@ data object Pong : HostMessage
 @Serializable
 @SerialName("error")
 data class HostError(val message: String) : HostMessage
+
+// A rendered preview of the current slide (PNG, Base64) so the remote can show
+// what's projected — useful while drawing or when the host screen isn't visible.
+@Serializable
+@SerialName("slide_image")
+data class SlideImage(val index: Int, val pngBase64: String) : HostMessage

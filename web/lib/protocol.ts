@@ -175,6 +175,13 @@ export interface HostError {
   message: string;
 }
 
+export interface SlideImage {
+  type: "slide_image";
+  index: number;
+  /** PNG of the current slide, Base64-encoded, for the remote preview. */
+  pngBase64: string;
+}
+
 export type HostMessage =
   | HelloAck
   | HelloReject
@@ -182,7 +189,8 @@ export type HostMessage =
   | SlideChanged
   | TimerState
   | Pong
-  | HostError;
+  | HostError
+  | SlideImage;
 
 // ---------------------------------------------------------------------------
 // Builders (Client -> Host) — convenience constructors used by the remote
@@ -251,6 +259,7 @@ const HOST_TYPES: ReadonlySet<string> = new Set([
   "timer_state",
   "pong",
   "error",
+  "slide_image",
 ]);
 
 export function encode(msg: ClientMessage | HostMessage): string {
