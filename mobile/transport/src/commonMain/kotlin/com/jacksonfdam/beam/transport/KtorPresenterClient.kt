@@ -37,11 +37,9 @@ class KtorPresenterClient(
     engineFactory: HttpClientEngineFactory<*> = httpClientEngineFactory(),
 ) : PresenterClient {
 
-    private val client = HttpClient(engineFactory) {
-        install(WebSockets) {
-            maxFrameSize = MAX_FRAME_SIZE
-        }
-    }
+    // Note: the client uses the engine default frame size — the OkHttp engine
+    // rejects overriding maxFrameSize. Large slide-image frames are received fine.
+    private val client = HttpClient(engineFactory) { install(WebSockets) }
 
     private val _state = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val state: StateFlow<ConnectionState> = _state.asStateFlow()
