@@ -131,6 +131,12 @@
     .feature h3 { margin: 0 0 8px; font-size: 17px; }
     .feature p { margin: 0; font-size: 14px; color: var(--muted); }
 
+    /* About */
+    .about-body { margin-top: 22px; max-width: 700px; }
+    .about-body p { color: color-mix(in srgb, var(--white) 78%, transparent); font-size: 16px; line-height: 1.75; margin: 0 0 14px; }
+    .about-body a { color: var(--beam-glow); text-decoration: underline; text-underline-offset: 3px; }
+    .about-body .sig { color: var(--white); font-weight: 600; margin-top: 4px; }
+
     /* Steps */
     .steps { margin-top: 44px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
     .step { border: 1px solid var(--ink-line); border-radius: var(--radius); background: color-mix(in srgb, var(--ink-soft) 40%, transparent); padding: 22px; }
@@ -146,7 +152,9 @@
     footer { border-top: 1px solid color-mix(in srgb, var(--ink-line) 60%, transparent); padding: 52px 0; }
     .foot-grid { display: flex; gap: 40px; flex-wrap: wrap; justify-content: space-between; }
     footer p { font-size: 14px; color: color-mix(in srgb, var(--white) 55%, transparent); max-width: 480px; }
-    .foot-bottom { margin-top: 40px; border-top: 1px solid color-mix(in srgb, var(--ink-line) 60%, transparent); padding-top: 22px; font-size: 13px; color: color-mix(in srgb, var(--white) 45%, transparent); }
+    .foot-bottom { margin-top: 40px; border-top: 1px solid color-mix(in srgb, var(--ink-line) 60%, transparent); padding-top: 22px; font-size: 13px; color: color-mix(in srgb, var(--white) 45%, transparent); display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
+    .foot-bottom .credit a { color: var(--beam-glow); text-decoration: none; }
+    .foot-bottom .credit a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -161,6 +169,7 @@
       <nav class="menu" aria-label="Primary">
         <a class="link" href="#features" data-i18n="nav.features">Features</a>
         <a class="link" href="#connect" data-i18n="nav.connect">How to connect</a>
+        <a class="link" href="#about" data-i18n="nav.about">About</a>
         <div class="lang" id="lang">
           <button class="lang-btn" id="lang-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Language"></button>
           <ul class="lang-menu" id="lang-menu" role="listbox" hidden></ul>
@@ -202,6 +211,13 @@
       </div>
     </section>
 
+    <section class="block" id="about">
+      <div class="wrap">
+        <h2 id="about-heading">Why Beam exists</h2>
+        <div class="about-body" id="about-body"></div>
+      </div>
+    </section>
+
     <section class="block" id="connect">
       <div class="wrap">
         <h2 data-i18n="connect.heading">How to connect</h2>
@@ -230,7 +246,10 @@
           <p data-i18n="footer.privacyBody">Nothing of substance. Slides, notes, navigation, timer, and ink stay on your local network. No accounts, no cloud storage, no telemetry.</p>
         </div>
       </div>
-      <div class="foot-bottom" data-i18n="footer.built">Built for presenters who just want it to work.</div>
+      <div class="foot-bottom">
+        <span data-i18n="footer.built">Built for presenters who just want it to work.</span>
+        <span class="credit">Built by <a href="https://github.com/jacksonfdam" target="_blank" rel="noopener">Jackson Mafra</a> (jacksonfdam)</span>
+      </div>
     </div>
   </footer>
 
@@ -238,7 +257,11 @@
     // --- i18n dictionaries ---------------------------------------------------
     const I18N = {
       en: {
-        nav: { features: "Features", connect: "How to connect", download: "Download" },
+        nav: { features: "Features", connect: "How to connect", about: "About", download: "Download" },
+        about: {
+          heading: "Why Beam exists",
+          bodyHtml: "<p>Beam started from a real problem. Preparing a talk for <a href=\"https://mdevcamp.eu/\" target=\"_blank\" rel=\"noopener\">mdevcamp.eu</a>, I had to jump between slides and four live demos while keeping an eye on my speaker notes and the clock — and do it smoothly. So I built a scrappy first version just to get through the talk.</p><p>It worked, so I kept going and grew it into what you see here — proudly built with Compose Multiplatform. Then it hit me that other speakers probably want the same thing, so I decided to share it.</p><p class=\"sig\">— Jackson Mafra (<a href=\"https://github.com/jacksonfdam\" target=\"_blank\" rel=\"noopener\">jacksonfdam</a>)</p>",
+        },
         hero: {
           badge: "Local-first presenter",
           title: "Turn any exported PDF into a flawless fullscreen presentation",
@@ -276,7 +299,11 @@
         ],
       },
       "pt-BR": {
-        nav: { features: "Recursos", connect: "Como conectar", download: "Baixar" },
+        nav: { features: "Recursos", connect: "Como conectar", about: "Sobre", download: "Baixar" },
+        about: {
+          heading: "Por que o Beam existe",
+          bodyHtml: "<p>O Beam nasceu de um problema real. Preparando uma palestra para o <a href=\"https://mdevcamp.eu/\" target=\"_blank\" rel=\"noopener\">mdevcamp.eu</a>, eu precisava alternar entre os slides e quatro demos ao vivo enquanto ficava de olho nas minhas notas e no tempo — e fazer isso sem travar. Então fiz uma primeira versão simples só para dar conta da palestra.</p><p>Funcionou, então continuei e a evoluí até o que você vê aqui — feito com orgulho em Compose Multiplatform. Depois percebi que outros palestrantes provavelmente querem a mesma coisa, e decidi compartilhar.</p><p class=\"sig\">— Jackson Mafra (<a href=\"https://github.com/jacksonfdam\" target=\"_blank\" rel=\"noopener\">jacksonfdam</a>)</p>",
+        },
         hero: {
           badge: "Apresentador local-first",
           title: "Transforme qualquer PDF exportado numa apresentação impecável em tela cheia",
@@ -314,7 +341,11 @@
         ],
       },
       es: {
-        nav: { features: "Funciones", connect: "Cómo conectar", download: "Descargar" },
+        nav: { features: "Funciones", connect: "Cómo conectar", about: "Acerca", download: "Descargar" },
+        about: {
+          heading: "Por qué existe Beam",
+          bodyHtml: "<p>Beam nació de un problema real. Preparando una charla para <a href=\"https://mdevcamp.eu/\" target=\"_blank\" rel=\"noopener\">mdevcamp.eu</a>, tenía que alternar entre las diapositivas y cuatro demos en vivo mientras vigilaba mis notas y el tiempo — y hacerlo con fluidez. Así que armé una primera versión sencilla solo para salir adelante en la charla.</p><p>Funcionó, así que seguí y la convertí en lo que ves aquí — hecho con orgullo en Compose Multiplatform. Luego me di cuenta de que otros ponentes seguramente quieren lo mismo, y decidí compartirlo.</p><p class=\"sig\">— Jackson Mafra (<a href=\"https://github.com/jacksonfdam\" target=\"_blank\" rel=\"noopener\">jacksonfdam</a>)</p>",
+        },
         hero: {
           badge: "Presentador local-first",
           title: "Convierte cualquier PDF exportado en una presentación impecable a pantalla completa",
@@ -352,7 +383,11 @@
         ],
       },
       sv: {
-        nav: { features: "Funktioner", connect: "Så ansluter du", download: "Ladda ner" },
+        nav: { features: "Funktioner", connect: "Så ansluter du", about: "Om", download: "Ladda ner" },
+        about: {
+          heading: "Varför Beam finns",
+          bodyHtml: "<p>Beam föddes ur ett verkligt problem. När jag förberedde ett föredrag för <a href=\"https://mdevcamp.eu/\" target=\"_blank\" rel=\"noopener\">mdevcamp.eu</a> behövde jag växla mellan bilder och fyra livedemos samtidigt som jag höll koll på mina anteckningar och tiden — och göra det smidigt. Så jag byggde en enkel första version bara för att ta mig igenom föredraget.</p><p>Det fungerade, så jag fortsatte och utvecklade den till det du ser här — stolt byggd med Compose Multiplatform. Sedan slog det mig att andra talare nog vill ha samma sak, så jag bestämde mig för att dela den.</p><p class=\"sig\">— Jackson Mafra (<a href=\"https://github.com/jacksonfdam\" target=\"_blank\" rel=\"noopener\">jacksonfdam</a>)</p>",
+        },
         hero: {
           badge: "Local-first-presentatör",
           title: "Förvandla vilken exporterad PDF som helst till en felfri helskärmspresentation",
@@ -435,6 +470,9 @@
 
       document.getElementById("step-grid").innerHTML = dict.stepItems
         .map((s, i) => `<div class="step"><span class="n">${i + 1}</span><h3>${s.title}</h3><p>${s.body}</p></div>`).join("");
+
+      document.getElementById("about-heading").textContent = dict.about.heading;
+      document.getElementById("about-body").innerHTML = dict.about.bodyHtml;
     }
 
     function apply(locale) {
