@@ -19,7 +19,9 @@ This project keeps the JetBrains KMP scaffold's module names and maps the build
 prompt's intended layout onto them (decision recorded here per the prompt):
 
 ```
-:core              domain models + wire protocol (com.jacksonfdam.beam.protocol) + BeamJson + transport interfaces
+:core              domain models + wire protocol (com.jacksonfdam.beam.protocol) + BeamJson + transport interfaces + notes sidecar
+:transport         Ktor PresenterClient (multiplatform) + PresenterServer (JVM/CIO) + handshake
+:pdf               PdfDocument expect/actual rendering (Desktop PDFBox, Android PdfRenderer, iOS CoreGraphics)
 :app:shared        Compose Multiplatform UI shared by the apps (presenter + remote features)
 :app:androidApp    Android remote entry point
 :app:iosApp        iOS remote entry point (Xcode)
@@ -41,11 +43,24 @@ hierarchies discriminated by a `"type"` key via `BeamJson`. Ink is normalized
 (`NormPoint`, `0f..1f`) and streamed `start → point* → end`. Notes ride on
 `SlideChanged` from a host-side sidecar.
 
+### Speaker-notes sidecar
+
+A PDF carries no notes, so the host pairs a deck with a `<deck>.notes.json`
+file (`DeckNotes` in `:core`) and pushes the current slide's note on
+`SlideChanged`:
+
+```json
+{ "version": 1, "notes": { "0": "Open warm", "3": "Pause for the demo" } }
+```
+
+Keys are zero-based slide indices; missing indices simply have no notes. The
+file is read by the host only — it never leaves the device.
+
 ## Build status
 
 - [x] Milestone 2 — `:core` wire protocol + JSON round-trip tests.
 - [x] Milestone 3 — `:transport` Ktor server/client + handshake + PIN (handshake tests in `:transport` jvmTest).
-- [ ] Milestone 4 — `:pdf` rendering (Android / iOS / Desktop).
+- [x] Milestone 4 — `:pdf` rendering (Android `PdfRenderer`, iOS CoreGraphics, Desktop PDFBox) + notes sidecar.
 - [ ] Milestone 5 — Desktop presenter (load PDF, fullscreen, QR/IP, presenter view).
 - [ ] Milestone 6 — Mobile remote (connect, deck picker, navigation, notes).
 - [ ] Milestone 7 — Live ink overlay.
