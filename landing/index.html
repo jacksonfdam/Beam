@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Beam — Turn any PDF into a flawless presentation</title>
+  <meta name="description" content="Beam turns any exported PDF into a fullscreen presentation, controlled from your phone. Local-first, no accounts, no cloud." />
+  <meta property="og:title" content="Beam — local-first PDF presenter" />
+  <meta property="og:description" content="Export to PDF. Present fullscreen. Control it from your phone. Nothing leaves your network." />
+  <meta property="og:type" content="website" />
+  <style>
+    :root {
+      --ink: #07080b;
+      --ink-soft: #0d0f15;
+      --ink-line: #20242e;
+      --white: #f4f6fb;
+      --muted: #9aa3b2;
+      --beam: #4f7cff;
+      --beam-glow: #8fb0ff;
+      --beam-bright: #6f96ff;
+      --radius: 18px;
+      --max: 1080px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--ink);
+      color: var(--white);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+    .muted { color: var(--muted); }
+
+    /* Header */
+    header {
+      position: sticky; top: 0; z-index: 30;
+      backdrop-filter: blur(10px);
+      background: color-mix(in srgb, var(--ink) 72%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, var(--ink-line) 60%, transparent);
+    }
+    .bar { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.02em; }
+    .brand .mark { width: 26px; height: 26px; }
+    nav.menu { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+    nav.menu a.link { color: var(--muted); text-decoration: none; }
+    nav.menu a.link:hover { color: var(--white); }
+    .cta {
+      display: inline-block; border: 1px solid color-mix(in srgb, var(--beam) 50%, transparent);
+      background: color-mix(in srgb, var(--beam) 12%, transparent);
+      color: var(--beam-glow); padding: 8px 16px; border-radius: 999px; text-decoration: none; font-weight: 600;
+    }
+    .cta:hover { background: color-mix(in srgb, var(--beam) 22%, transparent); }
+
+    /* Language switcher */
+    .langs { display: flex; gap: 4px; }
+    .langs button {
+      border: 1px solid var(--ink-line); background: transparent; color: var(--muted);
+      border-radius: 999px; padding: 5px 10px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .langs button[aria-pressed="true"] { background: var(--beam); color: var(--ink); border-color: var(--beam); }
+
+    /* Hero */
+    .hero { position: relative; overflow: hidden; text-align: center; padding: 96px 0 72px; }
+    .hero .glow {
+      position: absolute; left: 50%; top: -160px; width: 640px; height: 440px; transform: translateX(-50%);
+      background: color-mix(in srgb, var(--beam) 22%, transparent); filter: blur(120px); border-radius: 50%;
+      pointer-events: none;
+    }
+    .badge {
+      display: inline-block; border: 1px solid var(--ink-line); background: var(--ink-soft);
+      color: var(--beam-glow); padding: 6px 16px; border-radius: 999px; font-size: 12px;
+      text-transform: uppercase; letter-spacing: .18em; font-weight: 600; margin-bottom: 20px;
+    }
+    h1 { font-size: clamp(34px, 6vw, 60px); line-height: 1.08; letter-spacing: -.02em; margin: 0 auto; max-width: 760px; }
+    .hero p.sub { max-width: 620px; margin: 22px auto 0; font-size: 18px; color: color-mix(in srgb, var(--white) 78%, transparent); }
+    .flow { margin-top: 28px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .3em; color: var(--beam-glow); font-size: 14px; }
+    .hero .actions { margin-top: 36px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary { background: var(--beam); color: var(--ink); padding: 13px 26px; border-radius: 999px; font-weight: 700; text-decoration: none; }
+    .btn-primary:hover { background: var(--beam-bright); }
+    .btn-ghost { border: 1px solid var(--ink-line); color: var(--white); padding: 13px 26px; border-radius: 999px; font-weight: 700; text-decoration: none; }
+    .btn-ghost:hover { border-color: color-mix(in srgb, var(--beam) 60%, transparent); color: var(--beam-glow); }
+
+    section.block { border-top: 1px solid color-mix(in srgb, var(--ink-line) 60%, transparent); padding: 80px 0; }
+    section.block.alt { background: color-mix(in srgb, var(--ink-soft) 30%, transparent); }
+    h2 { font-size: clamp(26px, 4vw, 36px); letter-spacing: -.02em; margin: 0; }
+    .lead { margin-top: 14px; max-width: 640px; color: var(--muted); }
+
+    /* Demo videos */
+    .videos { margin-top: 44px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; }
+    .video-card { border: 1px solid var(--ink-line); border-radius: var(--radius); background: var(--ink); overflow: hidden; }
+    .video-card video, .video-ph {
+      width: 100%; aspect-ratio: 16 / 9; display: block; background: #000; object-fit: cover;
+    }
+    .video-ph {
+      display: flex; align-items: center; justify-content: center; color: var(--muted);
+      font-size: 13px; text-align: center; padding: 16px;
+      background: repeating-linear-gradient(45deg, #0b0d12, #0b0d12 12px, #0e1118 12px, #0e1118 24px);
+    }
+    .video-card .meta { padding: 16px 18px; }
+    .video-card .meta h3 { margin: 0 0 6px; font-size: 17px; }
+    .video-card .meta p { margin: 0; font-size: 14px; color: var(--muted); }
+
+    /* Features */
+    .grid { margin-top: 44px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+    .feature { border: 1px solid var(--ink-line); border-radius: var(--radius); background: var(--ink); padding: 22px; }
+    .feature h3 { margin: 0 0 8px; font-size: 17px; }
+    .feature p { margin: 0; font-size: 14px; color: var(--muted); }
+
+    /* Steps */
+    .steps { margin-top: 44px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+    .step { border: 1px solid var(--ink-line); border-radius: var(--radius); background: color-mix(in srgb, var(--ink-soft) 40%, transparent); padding: 22px; }
+    .step .n {
+      display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px;
+      border-radius: 999px; border: 1px solid color-mix(in srgb, var(--beam) 40%, transparent);
+      background: color-mix(in srgb, var(--beam) 10%, transparent); color: var(--beam-glow);
+      font-family: ui-monospace, monospace; font-size: 14px;
+    }
+    .step h3 { margin: 14px 0 6px; font-size: 17px; }
+    .step p { margin: 0; font-size: 14px; color: var(--muted); }
+
+    footer { border-top: 1px solid color-mix(in srgb, var(--ink-line) 60%, transparent); padding: 52px 0; }
+    .foot-grid { display: flex; gap: 40px; flex-wrap: wrap; justify-content: space-between; }
+    footer p { font-size: 14px; color: color-mix(in srgb, var(--white) 55%, transparent); max-width: 480px; }
+    .foot-bottom { margin-top: 40px; border-top: 1px solid color-mix(in srgb, var(--ink-line) 60%, transparent); padding-top: 22px; font-size: 13px; color: color-mix(in srgb, var(--white) 45%, transparent); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap bar">
+      <a class="brand" href="#top" aria-label="Beam">
+        <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 12h6l2-7 2 14 2-7h4" stroke="#6f96ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Beam</span>
+      </a>
+      <nav class="menu" aria-label="Primary">
+        <a class="link" href="#features" data-i18n="nav.features">Features</a>
+        <a class="link" href="#connect" data-i18n="nav.connect">How to connect</a>
+        <div class="langs" role="group" aria-label="Language" id="langs"></div>
+        <a class="cta" href="#download" data-i18n="nav.download">Download</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="glow" aria-hidden="true"></div>
+      <div class="wrap">
+        <span class="badge" data-i18n="hero.badge">Local-first presenter</span>
+        <h1 data-i18n="hero.title">Turn any exported PDF into a flawless fullscreen presentation</h1>
+        <p class="sub" data-i18n="hero.sub">Keynote, PowerPoint, Canva, Figma — export to PDF and Beam renders it exactly as designed. Control it all from your phone.</p>
+        <p class="flow" data-i18n="hero.flow">OPEN → PRESENT → DONE</p>
+        <div class="actions">
+          <a class="btn-primary" href="#download" data-i18n="hero.download">Download Beam</a>
+          <a class="btn-ghost" href="#demos" data-i18n="hero.watch">Watch the demos</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo videos: drop your files in ./videos/ and remove the placeholder. -->
+    <section class="block" id="demos">
+      <div class="wrap">
+        <h2 data-i18n="demos.heading">See Beam in action</h2>
+        <p class="lead" data-i18n="demos.lead">Short clips of the real app. Replace the placeholders with your own recordings.</p>
+        <div class="videos" id="demo-grid"></div>
+      </div>
+    </section>
+
+    <section class="block alt" id="features">
+      <div class="wrap">
+        <h2 data-i18n="features.heading">Everything a talk needs, nothing it doesn’t</h2>
+        <p class="lead" data-i18n="features.lead">Beam presents — it doesn’t author. That focus keeps it fast, private, and dead simple.</p>
+        <div class="grid" id="feature-grid"></div>
+      </div>
+    </section>
+
+    <section class="block" id="connect">
+      <div class="wrap">
+        <h2 data-i18n="connect.heading">How to connect</h2>
+        <p class="lead" data-i18n="connect.lead">Two devices, one Wi-Fi network, a short PIN. No sign-in, no pairing servers.</p>
+        <div class="steps" id="step-grid"></div>
+      </div>
+    </section>
+
+    <section class="block alt" id="download">
+      <div class="wrap">
+        <h2 data-i18n="download.heading">Download Beam</h2>
+        <p class="lead" data-i18n="download.lead">The desktop app is the presenter and host. The mobile app is the remote. Builds are on the way.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <div class="brand"><span>Beam</span></div>
+          <p data-i18n="footer.tagline">A local-first PDF presenter. Open → Present → Done.</p>
+        </div>
+        <div>
+          <p style="color: var(--white); font-weight: 600; text-transform: uppercase; letter-spacing: .1em; font-size: 13px;" data-i18n="footer.privacyHeading">What leaves your device</p>
+          <p data-i18n="footer.privacyBody">Nothing of substance. Slides, notes, navigation, timer, and ink stay on your local network. No accounts, no cloud storage, no telemetry.</p>
+        </div>
+      </div>
+      <div class="foot-bottom" data-i18n="footer.built">Built for presenters who just want it to work.</div>
+    </div>
+  </footer>
+
+  <script>
+    // --- i18n dictionaries ---------------------------------------------------
+    const I18N = {
+      en: {
+        nav: { features: "Features", connect: "How to connect", download: "Download" },
+        hero: {
+          badge: "Local-first presenter",
+          title: "Turn any exported PDF into a flawless fullscreen presentation",
+          sub: "Keynote, PowerPoint, Canva, Figma — export to PDF and Beam renders it exactly as designed. Control it all from your phone.",
+          flow: "OPEN → PRESENT → DONE", download: "Download Beam", watch: "Watch the demos",
+        },
+        demos: { heading: "See Beam in action", lead: "Short clips of the real app. Replace the placeholders with your own recordings." },
+        features: { heading: "Everything a talk needs, nothing it doesn’t", lead: "Beam presents — it doesn’t author. That focus keeps it fast, private, and dead simple." },
+        connect: { heading: "How to connect", lead: "Two devices, one Wi-Fi network, a short PIN. No sign-in, no pairing servers." },
+        download: { heading: "Download Beam", lead: "The desktop app is the presenter and host. The mobile app is the remote. Builds are on the way." },
+        footer: {
+          tagline: "A local-first PDF presenter. Open → Present → Done.",
+          privacyHeading: "What leaves your device",
+          privacyBody: "Nothing of substance. Slides, notes, navigation, timer, and ink stay on your local network. No accounts, no cloud storage, no telemetry.",
+          built: "Built for presenters who just want it to work.",
+        },
+        demoItems: [
+          { title: "Open & project a PDF", body: "Drag in an exported deck and go fullscreen on any display." },
+          { title: "Drive it from your phone", body: "Pair over the LAN and navigate with zero perceptible lag." },
+          { title: "Draw & spotlight live", body: "Annotate the slide or your screen straight from your hand." },
+          { title: "Speaker notes & timer", body: "Private notes and a host-owned timer, always in sync." },
+        ],
+        featureItems: [
+          { title: "Exact-as-designed rendering", body: "Beam renders the PDF itself — fonts, gradients, and layouts look precisely as exported." },
+          { title: "Your phone is the remote", body: "Drive the deck over the local network: next, previous, jump to a slide." },
+          { title: "Speaker notes, privately", body: "Notes show on your phone from a sidecar file — never on the projected slide." },
+          { title: "Live drawing & spotlight", body: "Ink appears on the slide instantly; spotlight a region to focus the room." },
+          { title: "Host-owned timer", body: "Start, pause, reset — the host keeps perfect time across reconnects." },
+          { title: "Fully local, fully private", body: "No accounts, no cloud, no telemetry. Devices talk directly over Wi-Fi." },
+        ],
+        stepItems: [
+          { title: "Open your deck on the desktop", body: "Launch Beam, open the exported PDF, go fullscreen on your chosen display." },
+          { title: "Scan the QR or type the IP", body: "The presenter screen shows a QR, the host IP, and a short PIN." },
+          { title: "Present from your phone", body: "Pick the deck, press Start, and navigate. Everything stays on your network." },
+        ],
+      },
+      "pt-BR": {
+        nav: { features: "Recursos", connect: "Como conectar", download: "Baixar" },
+        hero: {
+          badge: "Apresentador local-first",
+          title: "Transforme qualquer PDF exportado numa apresentação impecável em tela cheia",
+          sub: "Keynote, PowerPoint, Canva, Figma — exporte para PDF e o Beam renderiza exatamente como foi desenhado. Controle tudo pelo celular.",
+          flow: "ABRIR → APRESENTAR → PRONTO", download: "Baixar o Beam", watch: "Ver as demos",
+        },
+        demos: { heading: "Veja o Beam em ação", lead: "Clipes curtos do app real. Troque os placeholders pelas suas próprias gravações." },
+        features: { heading: "Tudo o que uma palestra precisa, nada além disso", lead: "O Beam apresenta — não edita. Esse foco o mantém rápido, privado e simples." },
+        connect: { heading: "Como conectar", lead: "Dois dispositivos, uma rede Wi-Fi, um PIN curto. Sem login, sem servidores de pareamento." },
+        download: { heading: "Baixar o Beam", lead: "O app desktop é o apresentador e host. O app mobile é o controle. As builds estão a caminho." },
+        footer: {
+          tagline: "Um apresentador de PDF local-first. Abrir → Apresentar → Pronto.",
+          privacyHeading: "O que sai do seu dispositivo",
+          privacyBody: "Nada de substancial. Slides, notas, navegação, cronômetro e tinta ficam na sua rede local. Sem contas, sem nuvem, sem telemetria.",
+          built: "Feito para apresentadores que só querem que funcione.",
+        },
+        demoItems: [
+          { title: "Abrir e projetar um PDF", body: "Arraste um deck exportado e vá para tela cheia em qualquer monitor." },
+          { title: "Controlar pelo celular", body: "Pareie pela rede local e navegue sem atraso perceptível." },
+          { title: "Desenhar e destacar ao vivo", body: "Anote o slide ou a tela direto da sua mão." },
+          { title: "Notas e cronômetro", body: "Notas privadas e um cronômetro do host, sempre sincronizados." },
+        ],
+        featureItems: [
+          { title: "Renderização fiel ao design", body: "O Beam renderiza o próprio PDF — fontes, gradientes e layouts ficam exatamente como exportados." },
+          { title: "Seu celular é o controle", body: "Conduza a apresentação pela rede local: avançar, voltar, pular para um slide." },
+          { title: "Notas do apresentador, em privado", body: "As notas aparecem no celular a partir de um arquivo separado — nunca no slide projetado." },
+          { title: "Desenho e destaque ao vivo", body: "A tinta aparece no slide na hora; destaque uma região para focar a sala." },
+          { title: "Cronômetro do host", body: "Inicie, pause, zere — o host mantém o tempo certo mesmo após reconexões." },
+          { title: "Totalmente local, totalmente privado", body: "Sem contas, sem nuvem, sem telemetria. Os dispositivos falam direto pelo Wi-Fi." },
+        ],
+        stepItems: [
+          { title: "Abra sua apresentação no desktop", body: "Inicie o Beam, abra o PDF exportado e vá para tela cheia na tela escolhida." },
+          { title: "Escaneie o QR ou digite o IP", body: "A tela do apresentador mostra um QR, o IP do host e um PIN curto." },
+          { title: "Apresente pelo celular", body: "Escolha a apresentação, toque em Iniciar e navegue. Tudo fica na sua rede." },
+        ],
+      },
+      es: {
+        nav: { features: "Funciones", connect: "Cómo conectar", download: "Descargar" },
+        hero: {
+          badge: "Presentador local-first",
+          title: "Convierte cualquier PDF exportado en una presentación impecable a pantalla completa",
+          sub: "Keynote, PowerPoint, Canva, Figma — exporta a PDF y Beam lo renderiza tal como lo diseñaste. Contrólalo todo desde tu teléfono.",
+          flow: "ABRIR → PRESENTAR → LISTO", download: "Descargar Beam", watch: "Ver las demos",
+        },
+        demos: { heading: "Mira Beam en acción", lead: "Clips cortos de la app real. Reemplaza los marcadores con tus propias grabaciones." },
+        features: { heading: "Todo lo que necesita una charla, nada más", lead: "Beam presenta — no edita. Ese enfoque lo mantiene rápido, privado y simplísimo." },
+        connect: { heading: "Cómo conectar", lead: "Dos dispositivos, una red Wi-Fi, un PIN corto. Sin inicio de sesión, sin servidores de emparejamiento." },
+        download: { heading: "Descargar Beam", lead: "La app de escritorio es el presentador y host. La app móvil es el control. Las versiones están en camino." },
+        footer: {
+          tagline: "Un presentador de PDF local-first. Abrir → Presentar → Listo.",
+          privacyHeading: "Qué sale de tu dispositivo",
+          privacyBody: "Nada sustancial. Diapositivas, notas, navegación, cronómetro y tinta se quedan en tu red local. Sin cuentas, sin nube, sin telemetría.",
+          built: "Hecho para presentadores que solo quieren que funcione.",
+        },
+        demoItems: [
+          { title: "Abrir y proyectar un PDF", body: "Arrastra un deck exportado y pasa a pantalla completa en cualquier pantalla." },
+          { title: "Controlar desde el teléfono", body: "Empareja por la red local y navega sin retraso perceptible." },
+          { title: "Dibujar y enfocar en vivo", body: "Anota la diapositiva o tu pantalla directamente desde tu mano." },
+          { title: "Notas y cronómetro", body: "Notas privadas y un cronómetro del host, siempre sincronizados." },
+        ],
+        featureItems: [
+          { title: "Renderizado fiel al diseño", body: "Beam renderiza el propio PDF — fuentes, degradados y diseños se ven tal como los exportaste." },
+          { title: "Tu teléfono es el control", body: "Maneja la presentación por la red local: siguiente, anterior, saltar a una diapositiva." },
+          { title: "Notas del orador, en privado", body: "Las notas aparecen en tu teléfono desde un archivo aparte — nunca en la diapositiva proyectada." },
+          { title: "Dibujo y foco en vivo", body: "La tinta aparece al instante; enfoca una región para centrar la atención." },
+          { title: "Cronómetro del host", body: "Inicia, pausa, reinicia — el host mantiene el tiempo exacto entre reconexiones." },
+          { title: "Totalmente local, totalmente privado", body: "Sin cuentas, sin nube, sin telemetría. Los dispositivos hablan directo por Wi-Fi." },
+        ],
+        stepItems: [
+          { title: "Abre tu presentación en el escritorio", body: "Inicia Beam, abre el PDF exportado y pasa a pantalla completa en la pantalla elegida." },
+          { title: "Escanea el QR o escribe la IP", body: "La pantalla del presentador muestra un QR, la IP del host y un PIN corto." },
+          { title: "Presenta desde tu teléfono", body: "Elige la presentación, pulsa Iniciar y navega. Todo se queda en tu red." },
+        ],
+      },
+      sv: {
+        nav: { features: "Funktioner", connect: "Så ansluter du", download: "Ladda ner" },
+        hero: {
+          badge: "Local-first-presentatör",
+          title: "Förvandla vilken exporterad PDF som helst till en felfri helskärmspresentation",
+          sub: "Keynote, PowerPoint, Canva, Figma — exportera till PDF och Beam återger den precis som designad. Styr allt från telefonen.",
+          flow: "ÖPPNA → PRESENTERA → KLAR", download: "Ladda ner Beam", watch: "Se demorna",
+        },
+        demos: { heading: "Se Beam i praktiken", lead: "Korta klipp från den riktiga appen. Byt ut platshållarna mot dina egna inspelningar." },
+        features: { heading: "Allt en presentation behöver, inget mer", lead: "Beam presenterar — det skapar inte. Det fokuset gör det snabbt, privat och dödssimpelt." },
+        connect: { heading: "Så ansluter du", lead: "Två enheter, ett Wi-Fi-nätverk, en kort PIN. Ingen inloggning, inga parkopplingsservrar." },
+        download: { heading: "Ladda ner Beam", lead: "Skrivbordsappen är presentatör och värd. Mobilappen är fjärrkontrollen. Versioner är på väg." },
+        footer: {
+          tagline: "En local-first PDF-presentatör. Öppna → Presentera → Klar.",
+          privacyHeading: "Vad som lämnar din enhet",
+          privacyBody: "Inget väsentligt. Bilder, anteckningar, navigering, timer och bläck stannar i ditt lokala nätverk. Inga konton, inget moln, ingen telemetri.",
+          built: "Byggt för presentatörer som bara vill att det ska fungera.",
+        },
+        demoItems: [
+          { title: "Öppna & projicera en PDF", body: "Dra in en exporterad presentation och gå till helskärm på valfri skärm." },
+          { title: "Styr från telefonen", body: "Parkoppla via LAN och navigera utan märkbar fördröjning." },
+          { title: "Rita & spotlighta live", body: "Anteckna på bilden eller din skärm direkt från handen." },
+          { title: "Talaranteckningar & timer", body: "Privata anteckningar och en värdägd timer, alltid synkade." },
+        ],
+        featureItems: [
+          { title: "Återgivning exakt som designad", body: "Beam återger PDF:en själv — typsnitt, gradienter och layouter ser ut precis som du exporterade." },
+          { title: "Telefonen är fjärrkontrollen", body: "Styr presentationen via det lokala nätverket: nästa, föregående, hoppa till en bild." },
+          { title: "Talaranteckningar, privat", body: "Anteckningar visas på telefonen från en sidofil — aldrig på den projicerade bilden." },
+          { title: "Live-ritning & spotlight", body: "Bläcket dyker upp direkt; spotlighta en yta för att rikta rummets fokus." },
+          { title: "Värdägd timer", body: "Starta, pausa, nollställ — värden håller tiden perfekt mellan återanslutningar." },
+          { title: "Helt lokalt, helt privat", body: "Inga konton, inget moln, ingen telemetri. Enheterna pratar direkt via Wi-Fi." },
+        ],
+        stepItems: [
+          { title: "Öppna presentationen på datorn", body: "Starta Beam, öppna den exporterade PDF:en, gå till helskärm på vald skärm." },
+          { title: "Skanna QR-koden eller skriv IP", body: "Presentatörsskärmen visar en QR, värdens IP och en kort PIN." },
+          { title: "Presentera från telefonen", body: "Välj presentationen, tryck Starta och navigera. Allt stannar i ditt nätverk." },
+        ],
+      },
+    };
+
+    const LOCALES = ["en", "pt-BR", "es", "sv"];
+    const LABELS = { en: "EN", "pt-BR": "PT", es: "ES", sv: "SV" };
+    const STORAGE = "beam.landing.locale";
+
+    // Optional demo video sources. Drop files in ./videos/ to enable playback;
+    // until a file exists the card shows a labelled placeholder.
+    const DEMO_VIDEOS = [
+      "videos/open-project.mp4",
+      "videos/phone-remote.mp4",
+      "videos/draw-spotlight.mp4",
+      "videos/notes-timer.mp4",
+    ];
+
+    function get(dict, path) {
+      return path.split(".").reduce((o, k) => (o == null ? o : o[k]), dict);
+    }
+
+    function detectLocale() {
+      const stored = localStorage.getItem(STORAGE);
+      if (stored && LOCALES.includes(stored)) return stored;
+      const n = (navigator.language || "en").toLowerCase();
+      if (n.startsWith("pt")) return "pt-BR";
+      if (n.startsWith("es")) return "es";
+      if (n.startsWith("sv")) return "sv";
+      return "en";
+    }
+
+    function renderCollections(dict) {
+      const demoGrid = document.getElementById("demo-grid");
+      demoGrid.innerHTML = dict.demoItems.map((d, i) => {
+        const src = DEMO_VIDEOS[i];
+        const media = src
+          ? `<video controls preload="metadata" playsinline><source src="${src}" type="video/mp4" /></video>`
+          : `<div class="video-ph">🎬 ${d.title}</div>`;
+        return `<div class="video-card">${media}<div class="meta"><h3>${d.title}</h3><p>${d.body}</p></div></div>`;
+      }).join("");
+
+      document.getElementById("feature-grid").innerHTML = dict.featureItems
+        .map((f) => `<div class="feature"><h3>${f.title}</h3><p>${f.body}</p></div>`).join("");
+
+      document.getElementById("step-grid").innerHTML = dict.stepItems
+        .map((s, i) => `<div class="step"><span class="n">${i + 1}</span><h3>${s.title}</h3><p>${s.body}</p></div>`).join("");
+    }
+
+    function apply(locale) {
+      const dict = I18N[locale] || I18N.en;
+      document.documentElement.lang = locale;
+      document.querySelectorAll("[data-i18n]").forEach((el) => {
+        const v = get(dict, el.getAttribute("data-i18n"));
+        if (typeof v === "string") el.textContent = v;
+      });
+      renderCollections(dict);
+      document.querySelectorAll("#langs button").forEach((b) =>
+        b.setAttribute("aria-pressed", String(b.dataset.locale === locale)));
+      localStorage.setItem(STORAGE, locale);
+    }
+
+    function buildSwitcher() {
+      const host = document.getElementById("langs");
+      host.innerHTML = LOCALES.map((l) => `<button type="button" data-locale="${l}">${LABELS[l]}</button>`).join("");
+      host.querySelectorAll("button").forEach((b) =>
+        b.addEventListener("click", () => apply(b.dataset.locale)));
+    }
+
+    buildSwitcher();
+    apply(detectLocale());
+  </script>
+</body>
+</html>
