@@ -61,7 +61,7 @@ file is read by the host only — it never leaves the device.
 - [x] Milestone 2 — `:core` wire protocol + JSON round-trip tests.
 - [x] Milestone 3 — `:transport` Ktor server/client + handshake + PIN (handshake tests in `:transport` jvmTest).
 - [x] Milestone 4 — `:pdf` rendering (Android `PdfRenderer`, iOS CoreGraphics, Desktop PDFBox) + notes sidecar.
-- [ ] Milestone 5 — Desktop presenter (load PDF, fullscreen, QR/IP, presenter view).
+- [x] Milestone 5 — Desktop presenter: load PDF, fullscreen projector on the external display, QR/IP/PIN, presenter view, live ink overlay.
 - [ ] Milestone 6 — Mobile remote (connect, deck picker, navigation, notes).
 - [ ] Milestone 7 — Live ink overlay.
 - [ ] Milestone 8 — Host-owned timer + reconnect-survives-state.
