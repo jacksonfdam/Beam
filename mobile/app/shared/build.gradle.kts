@@ -42,6 +42,7 @@ kotlin {
         }
         commonMain.dependencies {
             api(projects.core)
+            implementation(projects.transport)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
