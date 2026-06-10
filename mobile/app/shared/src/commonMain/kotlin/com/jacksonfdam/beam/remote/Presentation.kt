@@ -1,5 +1,6 @@
 package com.jacksonfdam.beam.remote
 
+import androidx.compose.ui.graphics.ImageBitmap
 import com.jacksonfdam.beam.protocol.DeckInfo
 
 /** Timer as last pushed by the host (the host owns the clock). */
@@ -18,4 +19,6 @@ data class Presentation(
     val hasNotes: Boolean = false,
     val timer: TimerView = TimerView(),
     val lastError: String? = null,
+    /** A preview of the current slide, pushed by the host; null until it arrives. */
+    val slideImage: ImageBitmap? = null,
 )

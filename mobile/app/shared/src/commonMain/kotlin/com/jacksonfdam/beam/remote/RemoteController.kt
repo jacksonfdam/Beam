@@ -17,6 +17,7 @@ import com.jacksonfdam.beam.protocol.Pong
 import com.jacksonfdam.beam.protocol.PresenterClient
 import com.jacksonfdam.beam.protocol.SelectDeck
 import com.jacksonfdam.beam.protocol.SlideChanged
+import com.jacksonfdam.beam.protocol.SlideImage
 import com.jacksonfdam.beam.protocol.StrokeEnd
 import com.jacksonfdam.beam.protocol.StrokePoint
 import com.jacksonfdam.beam.protocol.StrokeStart
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.io.encoding.Base64
 
 const val INK_COLOR_ARGB = 0xFFEF4444L
 const val INK_WIDTH_DP = 4f
@@ -82,6 +84,12 @@ class RemoteController(
     }
 
     private fun reduce(msg: HostMessage) {
+        // Decode the slide preview outside the update lambda (which may retry).
+        if (msg is SlideImage) {
+            val image = runCatching { decodeImageBytes(Base64.Default.decode(msg.pngBase64)) }.getOrNull()
+            _presentation.update { p -> if (msg.index == p.index) p.copy(slideImage = image) else p }
+            return
+        }
         _presentation.update { p ->
             when (msg) {
                 is HelloAck -> p.copy(decks = msg.decks, lastError = null)
@@ -92,11 +100,15 @@ class RemoteController(
                     hasNotes = msg.hasNotes,
                     index = 0,
                     notes = null,
+                    slideImage = null,
                 )
-                is SlideChanged -> p.copy(index = msg.index, total = msg.total, notes = msg.notes)
+
+                // New slide: drop the stale preview until the fresh one arrives.
+                is SlideChanged -> p.copy(index = msg.index, total = msg.total, notes = msg.notes, slideImage = null)
                 is TimerState -> p.copy(timer = TimerView(msg.elapsedMs, msg.running))
                 is HostError -> p.copy(lastError = msg.message)
                 is Pong -> p
+                is SlideImage -> p // handled above
             }
         }
     }
