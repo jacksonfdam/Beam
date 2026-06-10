@@ -25,6 +25,8 @@ class ProtocolRoundTripTest {
         TimerCmd(TimerAction.PAUSE),
         TimerCmd(TimerAction.RESET),
         Ping,
+        SetMode(PresentMode.SLIDES),
+        SetMode(PresentMode.SCREEN),
     )
 
     private val hostMessages: List<HostMessage> = listOf(
@@ -41,6 +43,7 @@ class ProtocolRoundTripTest {
         Pong,
         HostError(message = "boom"),
         SlideImage(index = 2, pngBase64 = "iVBORw0KGgo="),
+        ModeChanged(PresentMode.SCREEN),
     )
 
     @Test

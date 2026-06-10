@@ -69,6 +69,17 @@ enum class TimerAction { START, PAUSE, RESET }
 @SerialName("ping")
 data object Ping : ClientMessage
 
+// What the projector shows: the deck, or the host's live screen (for a demo).
+@Serializable
+enum class PresentMode { SLIDES, SCREEN }
+
+// Switch the projector between slides and the live screen — so the presenter
+// can step into a code/demo (sharing the real screen) and back, all from the
+// phone while still navigating the deck underneath.
+@Serializable
+@SerialName("set_mode")
+data class SetMode(val mode: PresentMode) : ClientMessage
+
 // ---------------------------------------------------------------------------
 // Host -> Client
 // ---------------------------------------------------------------------------
@@ -125,3 +136,8 @@ data class HostError(val message: String) : HostMessage
 @Serializable
 @SerialName("slide_image")
 data class SlideImage(val index: Int, val pngBase64: String) : HostMessage
+
+// The host echoes the active projector mode so every remote stays in sync.
+@Serializable
+@SerialName("mode_changed")
+data class ModeChanged(val mode: PresentMode) : HostMessage

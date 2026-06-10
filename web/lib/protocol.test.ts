@@ -30,6 +30,8 @@ const clientMessages: ClientMessage[] = [
   ClientMsg.timer("PAUSE"),
   ClientMsg.timer("RESET"),
   ClientMsg.ping(),
+  ClientMsg.setMode("SLIDES"),
+  ClientMsg.setMode("SCREEN"),
 ];
 
 // Every host->client message.

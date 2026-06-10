@@ -55,6 +55,7 @@ export interface DeckInfo {
 
 export type NavAction = "NEXT" | "PREV" | "FIRST" | "LAST";
 export type TimerAction = "START" | "PAUSE" | "RESET";
+export type PresentMode = "SLIDES" | "SCREEN";
 
 // ---------------------------------------------------------------------------
 // Client -> Host   (the remote drives)
@@ -116,6 +117,11 @@ export interface Ping {
   type: "ping";
 }
 
+export interface SetMode {
+  type: "set_mode";
+  mode: PresentMode;
+}
+
 export type ClientMessage =
   | Hello
   | SelectDeck
@@ -126,7 +132,8 @@ export type ClientMessage =
   | StrokeEnd
   | ClearInk
   | TimerCmd
-  | Ping;
+  | Ping
+  | SetMode;
 
 // ---------------------------------------------------------------------------
 // Host -> Client
@@ -182,6 +189,11 @@ export interface SlideImage {
   pngBase64: string;
 }
 
+export interface ModeChanged {
+  type: "mode_changed";
+  mode: PresentMode;
+}
+
 export type HostMessage =
   | HelloAck
   | HelloReject
@@ -190,7 +202,8 @@ export type HostMessage =
   | TimerState
   | Pong
   | HostError
-  | SlideImage;
+  | SlideImage
+  | ModeChanged;
 
 // ---------------------------------------------------------------------------
 // Builders (Client -> Host) — convenience constructors used by the remote
@@ -232,6 +245,9 @@ export const ClientMsg = {
   ping(): Ping {
     return { type: "ping" };
   },
+  setMode(mode: PresentMode): SetMode {
+    return { type: "set_mode", mode };
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -249,6 +265,7 @@ const CLIENT_TYPES: ReadonlySet<string> = new Set([
   "clear_ink",
   "timer",
   "ping",
+  "set_mode",
 ]);
 
 const HOST_TYPES: ReadonlySet<string> = new Set([
@@ -260,6 +277,7 @@ const HOST_TYPES: ReadonlySet<string> = new Set([
   "pong",
   "error",
   "slide_image",
+  "mode_changed",
 ]);
 
 export function encode(msg: ClientMessage | HostMessage): string {
