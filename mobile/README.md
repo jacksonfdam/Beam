@@ -1,3 +1,58 @@
+# Beam — native apps
+
+Beam turns any exported PDF (Keynote, PowerPoint, Canva, Figma) into a flawless
+fullscreen presentation, controlled from a phone. Local-first, LocalSend-style:
+no accounts, no cloud storage of user content, devices discover and talk to each
+other directly over the LAN. **Open → Present → Done.**
+
+## Platforms & roles
+
+| Target | Role |
+| --- | --- |
+| Desktop (Compose Multiplatform / JVM) | Presenter + host: renders the deck fullscreen, runs the presenter view, hosts the LAN WebSocket server, shows the QR / IP / PIN, owns the single source of truth (current slide, timer, notes). |
+| Android + iOS (Compose Multiplatform) | The remote: connects by QR or manual IP, picks a deck, navigates, controls the timer, draws on the slide, reads speaker notes. |
+| Web (`../web`) | Landing page + browser remote (WebRTC). Built and documented separately. |
+
+## Module map
+
+This project keeps the JetBrains KMP scaffold's module names and maps the build
+prompt's intended layout onto them (decision recorded here per the prompt):
+
+```
+:core              domain models + wire protocol (com.jacksonfdam.beam.protocol) + BeamJson + transport interfaces
+:app:shared        Compose Multiplatform UI shared by the apps (presenter + remote features)
+:app:androidApp    Android remote entry point
+:app:iosApp        iOS remote entry point (Xcode)
+:app:desktopApp    Desktop presenter/host entry point
+:server            Ktor server host pieces (JVM)
+```
+
+The wire protocol lives **once** in `:core`; the desktop server and every client
+depend on that single definition (DRY). Transport, PDF rendering, and UI depend
+on the abstractions in `:core` (`PresenterClient`, `PresenterServer`), never on a
+concrete engine (OCP/DIP).
+
+## Wire protocol (source of truth)
+
+`com.jacksonfdam.beam.protocol` in `:core` is canonical for the native apps and
+is mirrored by `../web/lib/protocol.ts` for the browser remote — the two must
+change together. Transport is JSON over WebSocket, polymorphic sealed
+hierarchies discriminated by a `"type"` key via `BeamJson`. Ink is normalized
+(`NormPoint`, `0f..1f`) and streamed `start → point* → end`. Notes ride on
+`SlideChanged` from a host-side sidecar.
+
+## Build status
+
+- [x] Milestone 2 — `:core` wire protocol + JSON round-trip tests.
+- [ ] Milestone 3 — `:transport` Ktor server/client + handshake + PIN.
+- [ ] Milestone 4 — `:pdf` rendering (Android / iOS / Desktop).
+- [ ] Milestone 5 — Desktop presenter (load PDF, fullscreen, QR/IP, presenter view).
+- [ ] Milestone 6 — Mobile remote (connect, deck picker, navigation, notes).
+- [ ] Milestone 7 — Live ink overlay.
+- [ ] Milestone 8 — Host-owned timer + reconnect-survives-state.
+
+---
+
 This is a Kotlin Multiplatform project targeting Android, iOS, Desktop (JVM), Server.
 
 * [/app/iosApp](./app/iosApp/iosApp) contains an iOS application. Even if you’re sharing your UI with Compose Multiplatform,
