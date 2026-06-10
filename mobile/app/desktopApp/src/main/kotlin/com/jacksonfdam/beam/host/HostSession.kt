@@ -13,7 +13,9 @@ import com.jacksonfdam.beam.protocol.Ping
 import com.jacksonfdam.beam.protocol.Pong
 import com.jacksonfdam.beam.protocol.PresenterServer
 import com.jacksonfdam.beam.protocol.SelectDeck
+import com.jacksonfdam.beam.pdf.PdfDocument
 import com.jacksonfdam.beam.protocol.SlideChanged
+import com.jacksonfdam.beam.protocol.SlideImage
 import com.jacksonfdam.beam.protocol.StrokeEnd
 import com.jacksonfdam.beam.protocol.StrokePoint
 import com.jacksonfdam.beam.protocol.StrokeStart
@@ -41,6 +43,7 @@ class HostSession(
     private val server: PresenterServer,
     private val scope: CoroutineScope,
     val sessionName: String,
+    private val encodeSlide: (PdfDocument, Int) -> String? = { _, _ -> null },
 ) {
     private val decks = LinkedHashMap<String, HostDeck>()
     private val strokes = LinkedHashMap<Long, InkStroke>()
@@ -85,20 +88,24 @@ class HostSession(
             is GoTo -> goTo(msg.index)
             is TimerCmd -> timer(msg.action)
             is StrokeStart -> {
-                strokes[msg.strokeId] = InkStroke(msg.strokeId, msg.colorArgb, msg.widthDp, listOf(msg.point))
+                strokes[msg.strokeId] =
+                    InkStroke(msg.strokeId, msg.colorArgb, msg.widthDp, listOf(msg.point))
                 publishStrokes()
             }
+
             is StrokePoint -> {
                 strokes[msg.strokeId]?.let { s ->
                     strokes[msg.strokeId] = s.copy(points = s.points + msg.point)
                     publishStrokes()
                 }
             }
+
             is StrokeEnd -> Unit // points already captured; nothing more to do
             is ClearInk -> {
                 strokes.clear()
                 publishStrokes()
             }
+
             is Ping -> server.broadcast(Pong)
         }
     }
@@ -152,6 +159,7 @@ class HostSession(
         val notes = deck.notes.notesFor(index)
         _state.update { it.copy(currentNotes = notes) }
         server.broadcast(SlideChanged(index, deck.info.slideCount, notes))
+        encodeSlide(deck.document, index)?.let { server.broadcast(SlideImage(index, it)) }
     }
 
     private fun publishStrokes() {
@@ -170,12 +178,14 @@ class HostSession(
                 timerRunning = true
                 startTicking()
             }
+
             TimerAction.PAUSE -> if (timerRunning) {
                 timerBaseMs = elapsedMs()
                 timerRunning = false
                 timerJob?.cancel()
                 timerJob = null
             }
+
             TimerAction.RESET -> {
                 timerBaseMs = 0
                 timerStartedAt = System.currentTimeMillis()
@@ -204,7 +214,9 @@ class HostSession(
     private suspend fun replayState() {
         current?.let { deck ->
             server.broadcast(DeckSelected(deck.info.id, deck.info.slideCount, deck.info.hasNotes))
-            server.broadcast(SlideChanged(_state.value.slideIndex, deck.info.slideCount, _state.value.currentNotes))
+            val index = _state.value.slideIndex
+            server.broadcast(SlideChanged(index, deck.info.slideCount, _state.value.currentNotes))
+            encodeSlide(deck.document, index)?.let { server.broadcast(SlideImage(index, it)) }
         }
         server.broadcast(TimerState(elapsedMs(), timerRunning))
     }

@@ -18,6 +18,7 @@ import com.jacksonfdam.beam.host.HostSession
 import com.jacksonfdam.beam.presenter.PresenterControlScreen
 import com.jacksonfdam.beam.presenter.ProjectorScreen
 import com.jacksonfdam.beam.presenter.SlideImages
+import com.jacksonfdam.beam.presenter.SlidePng
 import com.jacksonfdam.beam.protocol.DEFAULT_PORT
 import com.jacksonfdam.beam.transport.KtorPresenterServer
 import kotlinx.coroutines.CoroutineScope
@@ -42,7 +43,12 @@ fun main() = application {
     val session = remember {
         lateinit var s: HostSession
         val server = KtorPresenterServer { s.helloAck() }
-        s = HostSession(server, appScope, hostName())
+        s = HostSession(
+            server = server,
+            scope = appScope,
+            sessionName = hostName(),
+            encodeSlide = { document, index -> SlidePng.encode(document, index) },
+        )
         s
     }
 
