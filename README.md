@@ -105,7 +105,9 @@ cd mobile
 
 The control window shows a **QR + IP:port + PIN**; a second fullscreen window
 opens on the external display when present. Click **Open a PDF** to load a deck
-— it appears on the projector. For speaker notes, place a `<deck>.notes.json`
+— it appears on the projector. You can also drive it from the host: **→ / Enter
+/ Space / PageDown** (and a **click** on the projected slide) advance, **← /
+Backspace / PageUp** go back. For speaker notes, place a `<deck>.notes.json`
 next to the PDF:
 
 ```json

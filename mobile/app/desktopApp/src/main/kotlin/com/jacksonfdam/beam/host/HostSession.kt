@@ -94,6 +94,11 @@ class HostSession(
         selectDeck(deck.info.id)
     }
 
+    /** Local navigation from the presenter's own keyboard / mouse on the host. */
+    fun nav(action: NavAction) {
+        scope.launch { navigate(action) }
+    }
+
     private suspend fun handle(msg: ClientMessage) {
         when (msg) {
             is Hello -> replayState()

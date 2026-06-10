@@ -9,6 +9,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -25,6 +30,7 @@ import com.jacksonfdam.beam.presenter.ScreenCapture
 import com.jacksonfdam.beam.presenter.SlideImages
 import com.jacksonfdam.beam.presenter.SlidePng
 import com.jacksonfdam.beam.protocol.DEFAULT_PORT
+import com.jacksonfdam.beam.protocol.NavAction
 import com.jacksonfdam.beam.protocol.PresentMode
 import com.jacksonfdam.beam.transport.KtorPresenterServer
 import kotlinx.coroutines.CoroutineScope
@@ -70,7 +76,26 @@ fun main() = application {
     val state by session.state.collectAsState()
     val deck = session.deck(state.currentDeckId)
 
-    Window(onCloseRequest = ::exitApplication, title = "Beam — Presenter") {
+    // Presenter keyboard navigation, shared by both windows: → / Enter / Space /
+    // PageDown advance; ← / Backspace / PageUp go back.
+    fun onNavKey(e: KeyEvent): Boolean {
+        if (e.type != KeyEventType.KeyDown) return false
+        return when (e.key) {
+            Key.DirectionRight, Key.Enter, Key.NumPadEnter, Key.Spacebar, Key.PageDown -> {
+                session.nav(NavAction.NEXT); true
+            }
+            Key.DirectionLeft, Key.Backspace, Key.PageUp -> {
+                session.nav(NavAction.PREV); true
+            }
+            else -> false
+        }
+    }
+
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "Beam — Presenter",
+        onPreviewKeyEvent = ::onNavKey,
+    ) {
         MaterialTheme(colorScheme = darkColorScheme()) {
             ProvideStrings {
                 PresenterControlScreen(
@@ -106,6 +131,7 @@ fun main() = application {
         title = "Beam — Projector",
         undecorated = true,
         resizable = false,
+        onPreviewKeyEvent = ::onNavKey,
         // In SCREEN mode the projector hides so the real desktop (a demo/code) shows.
         visible = state.presentMode == PresentMode.SLIDES,
     ) {
@@ -114,7 +140,11 @@ fun main() = application {
                 val slide = remember(state.currentDeckId, state.slideIndex) {
                     deck?.let { runCatching { SlideImages.render(it.document, state.slideIndex, 1920) }.getOrNull() }
                 }
-                ProjectorScreen(slide = slide, strokes = state.strokes)
+                ProjectorScreen(
+                    slide = slide,
+                    strokes = state.strokes,
+                    onAdvance = { session.nav(NavAction.NEXT) },
+                )
             }
         }
     }
