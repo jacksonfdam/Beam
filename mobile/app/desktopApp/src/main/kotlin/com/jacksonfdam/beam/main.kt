@@ -15,6 +15,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.jacksonfdam.beam.host.DeckLoader
 import com.jacksonfdam.beam.host.HostSession
+import com.jacksonfdam.beam.presenter.InkOverlayScreen
 import com.jacksonfdam.beam.presenter.PresenterControlScreen
 import com.jacksonfdam.beam.presenter.ProjectorScreen
 import com.jacksonfdam.beam.presenter.SlideImages
@@ -96,6 +97,25 @@ fun main() = application {
             }
             ProjectorScreen(slide = slide, strokes = state.strokes)
         }
+    }
+
+    // Transparent annotation overlay for SCREEN mode: paints the ink over the
+    // live desktop (a demo being screen-shared). Shown only while strokes exist,
+    // so an empty overlay never blocks interaction with the demo.
+    val overlayState = rememberWindowState(
+        placement = WindowPlacement.Maximized,
+        position = projectorPosition(),
+    )
+    Window(
+        onCloseRequest = {},
+        state = overlayState,
+        title = "Beam — Annotations",
+        undecorated = true,
+        transparent = true,
+        alwaysOnTop = true,
+        visible = state.presentMode == PresentMode.SCREEN && state.strokes.isNotEmpty(),
+    ) {
+        InkOverlayScreen(state.strokes)
     }
 }
 
