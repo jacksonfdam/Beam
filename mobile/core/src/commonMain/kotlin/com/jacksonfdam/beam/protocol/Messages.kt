@@ -1,0 +1,121 @@
+package com.jacksonfdam.beam.protocol
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+/** Bumped when the wire format changes incompatibly; verified in the handshake. */
+const val PROTOCOL_VERSION = 1
+
+// ---------------------------------------------------------------------------
+// Client -> Host   (the phone / panel drives)
+// ---------------------------------------------------------------------------
+
+@Serializable
+sealed interface ClientMessage
+
+@Serializable
+@SerialName("hello")
+data class Hello(
+    val clientName: String,
+    val protocolVersion: Int = PROTOCOL_VERSION,
+    val pin: String? = null, // short code shown on the presenter screen
+) : ClientMessage
+
+@Serializable
+@SerialName("select_deck")
+data class SelectDeck(val deckId: String) : ClientMessage
+
+@Serializable
+@SerialName("nav")
+data class Nav(val action: NavAction) : ClientMessage
+
+@Serializable
+enum class NavAction { NEXT, PREV, FIRST, LAST }
+
+@Serializable
+@SerialName("goto")
+data class GoTo(val index: Int) : ClientMessage
+
+// Live ink: start -> point* -> end. strokeId groups points and enables undo/clear.
+@Serializable
+@SerialName("stroke_start")
+data class StrokeStart(
+    val strokeId: Long,
+    val colorArgb: Long,
+    val widthDp: Float,
+    val point: NormPoint,
+) : ClientMessage
+
+@Serializable
+@SerialName("stroke_point")
+data class StrokePoint(val strokeId: Long, val point: NormPoint) : ClientMessage
+
+@Serializable
+@SerialName("stroke_end")
+data class StrokeEnd(val strokeId: Long) : ClientMessage
+
+@Serializable
+@SerialName("clear_ink")
+data object ClearInk : ClientMessage
+
+@Serializable
+@SerialName("timer")
+data class TimerCmd(val action: TimerAction) : ClientMessage
+
+@Serializable
+enum class TimerAction { START, PAUSE, RESET }
+
+@Serializable
+@SerialName("ping")
+data object Ping : ClientMessage
+
+// ---------------------------------------------------------------------------
+// Host -> Client
+// ---------------------------------------------------------------------------
+
+@Serializable
+sealed interface HostMessage
+
+@Serializable
+@SerialName("hello_ack")
+data class HelloAck(
+    val sessionName: String,
+    val hostVersion: String,
+    val decks: List<DeckInfo>,
+) : HostMessage
+
+@Serializable
+@SerialName("hello_reject")
+data class HelloReject(val reason: String) : HostMessage // bad pin / version mismatch
+
+@Serializable
+@SerialName("deck_selected")
+data class DeckSelected(
+    val deckId: String,
+    val slideCount: Int,
+    val hasNotes: Boolean,
+) : HostMessage
+
+// Host owns the current slide and pushes it. Notes ride along so the phone's
+// presenter view shows them — the PDF itself usually carries no notes, so they
+// come from a sidecar the host owns.
+@Serializable
+@SerialName("slide_changed")
+data class SlideChanged(
+    val index: Int,
+    val total: Int,
+    val notes: String? = null,
+) : HostMessage
+
+// Host owns the clock, so the timer survives a phone reconnect.
+@Serializable
+@SerialName("timer_state")
+data class TimerState(val elapsedMs: Long, val running: Boolean) : HostMessage
+
+@Serializable
+@SerialName("pong")
+data object Pong : HostMessage
+
+@Serializable
+@SerialName("error")
+data class HostError(val message: String) : HostMessage
