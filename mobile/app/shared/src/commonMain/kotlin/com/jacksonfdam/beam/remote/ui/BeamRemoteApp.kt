@@ -1,11 +1,16 @@
 package com.jacksonfdam.beam.remote.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import com.jacksonfdam.beam.protocol.ConnectionState
 import com.jacksonfdam.beam.remote.RemoteController
 import com.jacksonfdam.beam.transport.KtorPresenterClient
@@ -23,14 +28,20 @@ fun BeamRemoteApp() {
         val connection by controller.connection.collectAsState()
         val presentation by controller.presentation.collectAsState()
 
-        when (connection) {
-            is ConnectionState.Connected ->
-                if (presentation.selectedDeckId == null) {
-                    DeckPickerScreen(presentation, controller)
-                } else {
-                    ControlScreen(presentation, controller)
+        Surface(modifier = Modifier.fillMaxSize()) {
+            // Keep content clear of the status bar and the gesture/nav bar.
+            Box(Modifier.fillMaxSize().safeDrawingPadding()) {
+                when (connection) {
+                    is ConnectionState.Connected ->
+                        if (presentation.selectedDeckId == null) {
+                            DeckPickerScreen(presentation, controller)
+                        } else {
+                            ControlScreen(presentation, controller)
+                        }
+
+                    else -> PairingScreen(connection, presentation, controller)
                 }
-            else -> PairingScreen(connection, presentation, controller)
+            }
         }
     }
 }
