@@ -1,0 +1,143 @@
+package com.jacksonfdam.beam.presenter
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import com.jacksonfdam.beam.host.HostDeck
+import com.jacksonfdam.beam.host.HostState
+
+/** The presenter's control window: live preview, next slide, notes, timer, and the connection card. */
+@Composable
+fun PresenterControlScreen(
+    state: HostState,
+    deck: HostDeck?,
+    onOpenDeck: () -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text("Beam", style = MaterialTheme.typography.headlineSmall)
+            Box(Modifier.weight(1f))
+            Text(
+                "${state.clientCount} remote${if (state.clientCount == 1) "" else "s"} connected",
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (state.clientCount > 0) MaterialTheme.colorScheme.primary else Color.Gray,
+            )
+            Button(onClick = onOpenDeck) { Text(if (deck == null) "Open a PDF" else "Open another PDF") }
+        }
+
+        Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            // Left: current slide + next.
+            Column(modifier = Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                CurrentSlide(state, deck, modifier = Modifier.weight(1f))
+                NextSlide(state, deck)
+            }
+
+            // Right: connection, timer, notes.
+            Column(
+                modifier = Modifier.width(280.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                state.endpoint?.let { ConnectionCard(it, state.pin, modifier = Modifier.fillMaxWidth()) }
+                TimerCard(state.timerElapsedMs, state.timerRunning)
+                NotesCard(state.currentNotes, deck != null)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CurrentSlide(state: HostState, deck: HostDeck?, modifier: Modifier = Modifier) {
+    Card(modifier = modifier.fillMaxWidth()) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                if (state.hasDeck) "Slide ${state.slideIndex + 1} / ${state.slideTotal}" else "No deck loaded",
+                style = MaterialTheme.typography.titleMedium,
+            )
+            val preview = remember(deck?.info?.id, state.slideIndex) {
+                deck?.let { runCatching { SlideImages.render(it.document, state.slideIndex, 1280) }.getOrNull() }
+            }
+            Box(Modifier.fillMaxSize().background(Color.Black).clip(RoundedCornerShape(6.dp)), contentAlignment = Alignment.Center) {
+                if (preview != null) {
+                    Image(preview, contentDescription = "Current slide", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
+                } else {
+                    Text("Open a PDF and press Start on a remote", color = Color.Gray)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NextSlide(state: HostState, deck: HostDeck?) {
+    val hasNext = state.slideIndex + 1 < state.slideTotal
+    val next = remember(deck?.info?.id, state.slideIndex) {
+        deck?.takeIf { hasNext }?.let { runCatching { SlideImages.render(it.document, state.slideIndex + 1, 640) }.getOrNull() }
+    }
+    Card {
+        Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("Next", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
+            Box(Modifier.width(160.dp).aspectRatio(16f / 9f).background(Color.Black).clip(RoundedCornerShape(4.dp)), contentAlignment = Alignment.Center) {
+                if (next != null) {
+                    Image(next, contentDescription = "Next slide", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
+                } else {
+                    Text(if (hasNext) "…" else "End", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TimerCard(elapsedMs: Long, running: Boolean) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text("Timer", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
+            Text(formatElapsed(elapsedMs), style = MaterialTheme.typography.headlineMedium)
+            Text(if (running) "Running" else "Paused", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+        }
+    }
+}
+
+@Composable
+private fun NotesCard(notes: String?, hasDeck: Boolean) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Speaker notes", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
+            Text(
+                notes ?: if (hasDeck) "No notes for this slide." else "Load a deck to see notes.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+    }
+}
+
+private fun formatElapsed(ms: Long): String {
+    val total = (ms / 1000).coerceAtLeast(0)
+    val h = total / 3600
+    val m = (total % 3600) / 60
+    val s = total % 60
+    return if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%02d:%02d".format(m, s)
+}
