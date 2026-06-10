@@ -9,7 +9,7 @@
  * bundle defines the shape; the others must match it (TypeScript enforces this).
  */
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 export const LOCALES = ["en", "pt-BR", "es", "sv"] as const;
 export type Locale = (typeof LOCALES)[number];
@@ -19,6 +19,20 @@ export const LOCALE_LABELS: Record<Locale, string> = {
   "pt-BR": "PT",
   es: "ES",
   sv: "SV",
+};
+
+export const LOCALE_FLAGS: Record<Locale, string> = {
+  en: "🇬🇧",
+  "pt-BR": "🇧🇷",
+  es: "🇪🇸",
+  sv: "🇸🇪",
+};
+
+export const LOCALE_NAMES: Record<Locale, string> = {
+  en: "English",
+  "pt-BR": "Português (BR)",
+  es: "Español",
+  sv: "Svenska",
 };
 
 const en = {
@@ -529,24 +543,60 @@ export function useI18n(): I18nContextValue {
   return ctx;
 }
 
-/** Compact EN / PT / ES / SV switcher. */
+/** Dropdown language switcher: flag emoji + label, opens a flag + name menu. */
 export function LanguageSwitcher({ className = "" }: { className?: string }) {
   const { locale, setLocale } = useI18n();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+
   return (
-    <div className={`flex gap-1 ${className}`} role="group" aria-label="Language">
-      {LOCALES.map((l) => (
-        <button
-          key={l}
-          type="button"
-          onClick={() => setLocale(l)}
-          aria-pressed={locale === l}
-          className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
-            locale === l ? "bg-beam text-ink" : "border border-ink-line text-white/70 hover:text-white"
-          }`}
+    <div ref={ref} className={`relative ${className}`}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label="Language"
+        className="flex items-center gap-1.5 rounded-full border border-ink-line px-3 py-1.5 text-sm font-medium text-white/80 transition hover:text-white"
+      >
+        <span aria-hidden="true" className="text-base leading-none">{LOCALE_FLAGS[locale]}</span>
+        <span>{LOCALE_LABELS[locale]}</span>
+        <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" className="opacity-70">
+          <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute right-0 z-50 mt-2 min-w-[176px] overflow-hidden rounded-xl border border-ink-line bg-ink-soft p-1.5 shadow-2xl"
         >
-          {LOCALE_LABELS[l]}
-        </button>
-      ))}
+          {LOCALES.map((l) => (
+            <li key={l}>
+              <button
+                type="button"
+                role="option"
+                aria-selected={locale === l}
+                onClick={() => { setLocale(l); setOpen(false); }}
+                className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm transition hover:bg-white/5 ${
+                  locale === l ? "text-beam-glow" : "text-white/80"
+                }`}
+              >
+                <span aria-hidden="true" className="text-base leading-none">{LOCALE_FLAGS[l]}</span>
+                <span>{LOCALE_NAMES[l]}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

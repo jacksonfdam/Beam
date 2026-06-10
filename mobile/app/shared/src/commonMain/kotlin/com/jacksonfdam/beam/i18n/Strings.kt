@@ -5,11 +5,16 @@ package com.jacksonfdam.beam.i18n
  * shown in the in-app language selector. Swedish is `sv` (the language), not
  * `se` (which is the country code for Sweden).
  */
-enum class Language(val tag: String, val label: String) {
-    EN("en", "EN"),
-    PT_BR("pt-BR", "PT"),
-    ES("es", "ES"),
-    SV("sv", "SV"),
+enum class Language(
+    val tag: String,
+    val label: String,
+    val flag: String,
+    val nativeName: String,
+) {
+    EN("en", "EN", "🇬🇧", "English"),
+    PT_BR("pt-BR", "PT", "🇧🇷", "Português (BR)"),
+    ES("es", "ES", "🇪🇸", "Español"),
+    SV("sv", "SV", "🇸🇪", "Svenska"),
 }
 
 /**
