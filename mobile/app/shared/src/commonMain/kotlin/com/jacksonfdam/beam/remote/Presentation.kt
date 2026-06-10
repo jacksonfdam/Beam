@@ -25,4 +25,6 @@ data class Presentation(
     val presentMode: PresentMode = PresentMode.SLIDES,
     val interacting: Boolean = false,
     val screenAspect: Float = 16f / 9f,
+    /** Live screenshot of the host, pushed while in SCREEN mode. */
+    val screenImage: ImageBitmap? = null,
 )

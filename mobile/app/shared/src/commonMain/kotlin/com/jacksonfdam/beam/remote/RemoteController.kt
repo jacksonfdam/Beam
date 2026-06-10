@@ -17,6 +17,7 @@ import com.jacksonfdam.beam.protocol.PresentMode
 import com.jacksonfdam.beam.protocol.NormPoint
 import com.jacksonfdam.beam.protocol.Pong
 import com.jacksonfdam.beam.protocol.PresenterClient
+import com.jacksonfdam.beam.protocol.ScreenImage
 import com.jacksonfdam.beam.protocol.SelectDeck
 import com.jacksonfdam.beam.protocol.SetInteracting
 import com.jacksonfdam.beam.protocol.SetMode
@@ -112,6 +113,11 @@ class RemoteController(
             _presentation.update { p -> if (msg.index == p.index) p.copy(slideImage = image) else p }
             return
         }
+        if (msg is ScreenImage) {
+            val image = runCatching { decodeImageBytes(Base64.Default.decode(msg.jpegBase64)) }.getOrNull()
+            _presentation.update { p -> p.copy(screenImage = image) }
+            return
+        }
         _presentation.update { p ->
             when (msg) {
                 is HelloAck -> p.copy(decks = msg.decks, screenAspect = msg.screenAspect, lastError = null)
@@ -132,6 +138,7 @@ class RemoteController(
                 is Pong -> p
                 is ModeChanged -> p.copy(presentMode = msg.mode)
                 is SlideImage -> p // handled above
+                is ScreenImage -> p // handled above
             }
         }
     }

@@ -55,7 +55,8 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
         if (slidesMode) {
             presentation.slideImage?.let { SlidePreview(it) }
         } else {
-            ScreenModeNote()
+            val shot = presentation.screenImage
+            if (shot != null) SlidePreview(shot) else ScreenModeNote()
             InteractToggle(presentation.interacting) { controller.setInteracting(it) }
         }
 
@@ -100,8 +101,8 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
             DrawingSurface(
                 controller = controller,
                 tool = effectiveTool,
-                // In SCREEN mode you annotate over the live screen, not the slide.
-                slide = if (slidesMode) presentation.slideImage else null,
+                // In SCREEN mode you draw over the live screen snapshot.
+                slide = if (slidesMode) presentation.slideImage else presentation.screenImage,
                 slideKey = if (slidesMode) presentation.index else "screen",
                 fallbackAspect = presentation.screenAspect,
                 modifier = Modifier.fillMaxWidth(),
