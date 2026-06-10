@@ -41,6 +41,7 @@ import com.jacksonfdam.beam.remote.RemoteController
 @Composable
 fun ControlScreen(presentation: Presentation, controller: RemoteController) {
     var showDrawing by remember { mutableStateOf(false) }
+    var tool by remember { mutableStateOf(DrawTool.PEN) }
 
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
@@ -55,6 +56,7 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
             presentation.slideImage?.let { SlidePreview(it) }
         } else {
             ScreenModeNote()
+            InteractToggle(presentation.interacting) { controller.setInteracting(it) }
         }
 
         SlideIndicator(presentation.index, presentation.total)
@@ -90,14 +92,18 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
         TimerCard(presentation.timer.elapsedMs, presentation.timer.running, controller)
 
         TextButton(onClick = { showDrawing = !showDrawing }) {
-            Text(if (showDrawing) "Hide drawing" else "Draw on the slide")
+            Text(if (showDrawing) "Hide drawing" else if (slidesMode) "Draw on the slide" else "Draw / spotlight")
         }
         if (showDrawing) {
+            val effectiveTool = if (slidesMode && tool == DrawTool.SPOTLIGHT) DrawTool.PEN else tool
+            ToolSelector(effectiveTool, allowSpotlight = !slidesMode) { tool = it }
             DrawingSurface(
                 controller = controller,
+                tool = effectiveTool,
                 // In SCREEN mode you annotate over the live screen, not the slide.
                 slide = if (slidesMode) presentation.slideImage else null,
                 slideKey = if (slidesMode) presentation.index else "screen",
+                fallbackAspect = presentation.screenAspect,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -118,6 +124,25 @@ private fun ModeButton(label: String, selected: Boolean, modifier: Modifier, onC
         Button(onClick = onClick, modifier = modifier) { Text(label) }
     } else {
         OutlinedButton(onClick = onClick, modifier = modifier) { Text(label) }
+    }
+}
+
+@Composable
+private fun InteractToggle(interacting: Boolean, onSet: (Boolean) -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        ModeButton("Annotate", !interacting, Modifier.weight(1f)) { onSet(false) }
+        ModeButton("Interact", interacting, Modifier.weight(1f)) { onSet(true) }
+    }
+}
+
+@Composable
+private fun ToolSelector(tool: DrawTool, allowSpotlight: Boolean, onSelect: (DrawTool) -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        ModeButton("Pen", tool == DrawTool.PEN, Modifier.weight(1f)) { onSelect(DrawTool.PEN) }
+        ModeButton("Marker", tool == DrawTool.HIGHLIGHTER, Modifier.weight(1f)) { onSelect(DrawTool.HIGHLIGHTER) }
+        if (allowSpotlight) {
+            ModeButton("Spotlight", tool == DrawTool.SPOTLIGHT, Modifier.weight(1f)) { onSelect(DrawTool.SPOTLIGHT) }
+        }
     }
 }
 
