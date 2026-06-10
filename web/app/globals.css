@@ -1,6 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Keep the JS theme config (custom ink/beam colours, fonts) under Tailwind v4. */
+@config "../tailwind.config.ts";
 
 :root {
   --background: #07080b;
