@@ -33,6 +33,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.jacksonfdam.beam.protocol.NavAction
+import com.jacksonfdam.beam.protocol.PresentMode
 import com.jacksonfdam.beam.protocol.TimerAction
 import com.jacksonfdam.beam.remote.Presentation
 import com.jacksonfdam.beam.remote.RemoteController
@@ -46,6 +47,8 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         ConnectedHeader(controller)
+
+        ModeToggle(presentation.presentMode) { controller.setMode(it) }
 
         presentation.slideImage?.let { SlidePreview(it) }
 
@@ -92,6 +95,23 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
                 modifier = Modifier.fillMaxWidth(),
             )
         }
+    }
+}
+
+@Composable
+private fun ModeToggle(mode: PresentMode, onSetMode: (PresentMode) -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        ModeButton("Slides", mode == PresentMode.SLIDES, Modifier.weight(1f)) { onSetMode(PresentMode.SLIDES) }
+        ModeButton("Screen", mode == PresentMode.SCREEN, Modifier.weight(1f)) { onSetMode(PresentMode.SCREEN) }
+    }
+}
+
+@Composable
+private fun ModeButton(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    if (selected) {
+        Button(onClick = onClick, modifier = modifier) { Text(label) }
+    } else {
+        OutlinedButton(onClick = onClick, modifier = modifier) { Text(label) }
     }
 }
 

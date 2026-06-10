@@ -10,12 +10,15 @@ import com.jacksonfdam.beam.protocol.HelloReject
 import com.jacksonfdam.beam.protocol.HostEndpoint
 import com.jacksonfdam.beam.protocol.HostError
 import com.jacksonfdam.beam.protocol.HostMessage
+import com.jacksonfdam.beam.protocol.ModeChanged
 import com.jacksonfdam.beam.protocol.Nav
 import com.jacksonfdam.beam.protocol.NavAction
+import com.jacksonfdam.beam.protocol.PresentMode
 import com.jacksonfdam.beam.protocol.NormPoint
 import com.jacksonfdam.beam.protocol.Pong
 import com.jacksonfdam.beam.protocol.PresenterClient
 import com.jacksonfdam.beam.protocol.SelectDeck
+import com.jacksonfdam.beam.protocol.SetMode
 import com.jacksonfdam.beam.protocol.SlideChanged
 import com.jacksonfdam.beam.protocol.SlideImage
 import com.jacksonfdam.beam.protocol.StrokeEnd
@@ -68,6 +71,7 @@ class RemoteController(
     fun nav(action: NavAction) = send(Nav(action))
     fun goTo(index: Int) = send(GoTo(index))
     fun timer(action: TimerAction) = send(TimerCmd(action))
+    fun setMode(mode: PresentMode) = send(SetMode(mode))
     fun clearInk() = send(ClearInk)
 
     fun beginStroke(point: NormPoint): Long {
@@ -108,6 +112,7 @@ class RemoteController(
                 is TimerState -> p.copy(timer = TimerView(msg.elapsedMs, msg.running))
                 is HostError -> p.copy(lastError = msg.message)
                 is Pong -> p
+                is ModeChanged -> p.copy(presentMode = msg.mode)
                 is SlideImage -> p // handled above
             }
         }
