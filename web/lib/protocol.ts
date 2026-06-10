@@ -210,6 +210,12 @@ export interface ModeChanged {
   mode: PresentMode;
 }
 
+export interface ScreenImage {
+  type: "screen_image";
+  /** JPEG of the host's live screen, Base64-encoded. */
+  jpegBase64: string;
+}
+
 export type HostMessage =
   | HelloAck
   | HelloReject
@@ -219,7 +225,8 @@ export type HostMessage =
   | Pong
   | HostError
   | SlideImage
-  | ModeChanged;
+  | ModeChanged
+  | ScreenImage;
 
 // ---------------------------------------------------------------------------
 // Builders (Client -> Host) — convenience constructors used by the remote
@@ -302,6 +309,7 @@ const HOST_TYPES: ReadonlySet<string> = new Set([
   "error",
   "slide_image",
   "mode_changed",
+  "screen_image",
 ]);
 
 export function encode(msg: ClientMessage | HostMessage): string {

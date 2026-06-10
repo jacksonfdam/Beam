@@ -53,6 +53,8 @@ const hostMessages: HostMessage[] = [
   { type: "pong" },
   { type: "error", message: "boom" },
   { type: "slide_image", index: 2, pngBase64: "iVBORw0KGgo=" },
+  { type: "mode_changed", mode: "SCREEN" },
+  { type: "screen_image", jpegBase64: "/9j/4AAQ" },
 ];
 
 describe("protocol round-trip", () => {

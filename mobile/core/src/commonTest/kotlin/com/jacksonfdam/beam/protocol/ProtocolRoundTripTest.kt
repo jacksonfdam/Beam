@@ -46,6 +46,7 @@ class ProtocolRoundTripTest {
         HostError(message = "boom"),
         SlideImage(index = 2, pngBase64 = "iVBORw0KGgo="),
         ModeChanged(PresentMode.SCREEN),
+        ScreenImage(jpegBase64 = "/9j/4AAQ"),
     )
 
     @Test

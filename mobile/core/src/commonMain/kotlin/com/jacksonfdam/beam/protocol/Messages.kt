@@ -159,3 +159,9 @@ data class SlideImage(val index: Int, val pngBase64: String) : HostMessage
 @Serializable
 @SerialName("mode_changed")
 data class ModeChanged(val mode: PresentMode) : HostMessage
+
+// A periodic snapshot of the host's live screen (JPEG, Base64) for SCREEN mode,
+// so the remote can see the demo and annotate over it.
+@Serializable
+@SerialName("screen_image")
+data class ScreenImage(val jpegBase64: String) : HostMessage
