@@ -5,6 +5,7 @@ import type { NavAction, PresentMode, TimerAction } from "@/lib/protocol";
 import type { Presentation } from "./useBeamRemote";
 import { DrawingSurface, type DrawTool } from "./DrawingSurface";
 import { useWallClock } from "./clock";
+import { useI18n } from "@/lib/i18n";
 
 interface Props {
   presentation: Presentation;
@@ -46,16 +47,15 @@ function DeckPicker({
   onDisconnect: () => void;
   sessionName: string;
 }) {
+  const { t } = useI18n();
   return (
     <section className="mx-auto w-full max-w-md" aria-labelledby="deck-heading">
       <ConnectedHeader sessionName={sessionName} onDisconnect={onDisconnect} />
       <h2 id="deck-heading" className="mt-6 text-xl font-semibold">
-        Choose a deck
+        {t.controls.chooseDeck}
       </h2>
       {decks.length === 0 ? (
-        <p className="mt-3 text-sm text-white/55">
-          No decks available yet. Open one on the host.
-        </p>
+        <p className="mt-3 text-sm text-white/55">{t.controls.noDecks}</p>
       ) : (
         <ul className="mt-4 space-y-3">
           {decks.map((d) => (
@@ -68,7 +68,7 @@ function DeckPicker({
                 <span>
                   <span className="block font-medium text-white">{d.title}</span>
                   <span className="block text-xs text-white/50">
-                    {d.slideCount} slides{d.hasNotes ? " · notes" : ""}
+                    {d.slideCount} {t.controls.slides}{d.hasNotes ? ` · ${t.controls.notes}` : ""}
                   </span>
                 </span>
                 <span aria-hidden="true" className="text-beam-glow">→</span>
@@ -83,6 +83,7 @@ function DeckPicker({
 
 function ConnectedDeck(props: Props) {
   const { presentation: p } = props;
+  const { t } = useI18n();
   const [showDrawing, setShowDrawing] = useState(false);
   const [tool, setTool] = useState<DrawTool>("PEN");
   const slidesMode = p.presentMode === "SLIDES";
@@ -109,16 +110,16 @@ function ConnectedDeck(props: Props) {
 
       <Segmented
         options={[
-          { label: "Slides", selected: slidesMode, onClick: () => props.onSetMode("SLIDES") },
-          { label: "Screen", selected: !slidesMode, onClick: () => props.onSetMode("SCREEN") },
+          { label: t.controls.slidesMode, selected: slidesMode, onClick: () => props.onSetMode("SLIDES") },
+          { label: t.controls.screenMode, selected: !slidesMode, onClick: () => props.onSetMode("SCREEN") },
         ]}
       />
 
       {!slidesMode && (
         <Segmented
           options={[
-            { label: "Annotate", selected: !p.interacting, onClick: () => props.onSetInteracting(false) },
-            { label: "Interact", selected: p.interacting, onClick: () => props.onSetInteracting(true) },
+            { label: t.controls.annotate, selected: !p.interacting, onClick: () => props.onSetInteracting(false) },
+            { label: t.controls.interact, selected: p.interacting, onClick: () => props.onSetInteracting(true) },
           ]}
         />
       )}
@@ -126,7 +127,7 @@ function ConnectedDeck(props: Props) {
       {previewImage && !showDrawing && (
         <img
           src={previewImage}
-          alt={slidesMode ? "Current slide" : "Live screen"}
+          alt={slidesMode ? t.controls.currentSlide : t.controls.liveScreen}
           className="w-full rounded-2xl border border-ink-line bg-black"
         />
       )}
@@ -134,21 +135,21 @@ function ConnectedDeck(props: Props) {
       <SlideIndicator index={p.index} total={p.total} />
 
       <div className="grid grid-cols-3 gap-3">
-        <NavButton label="Previous" onClick={() => props.onNav("PREV")}>
-          ‹ Prev
+        <NavButton label={t.controls.previousAria} onClick={() => props.onNav("PREV")}>
+          {t.controls.prev}
         </NavButton>
         <GoToControl total={p.total} onGoTo={props.onGoTo} />
-        <NavButton label="Next" onClick={() => props.onNav("NEXT")}>
-          Next ›
+        <NavButton label={t.controls.nextAria} onClick={() => props.onNav("NEXT")}>
+          {t.controls.next}
         </NavButton>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <NavButton label="First slide" onClick={() => props.onNav("FIRST")}>
-          ⤒ First
+        <NavButton label={t.controls.firstAria} onClick={() => props.onNav("FIRST")}>
+          {t.controls.first}
         </NavButton>
-        <NavButton label="Last slide" onClick={() => props.onNav("LAST")}>
-          Last ⤓
+        <NavButton label={t.controls.lastAria} onClick={() => props.onNav("LAST")}>
+          {t.controls.last}
         </NavButton>
       </div>
 
@@ -166,17 +167,17 @@ function ConnectedDeck(props: Props) {
           aria-expanded={showDrawing}
           className="text-sm font-medium text-beam-glow underline underline-offset-4 hover:text-beam-bright"
         >
-          {showDrawing ? "Hide drawing" : slidesMode ? "Draw on the slide" : "Draw / spotlight"}
+          {showDrawing ? t.controls.hideDrawing : slidesMode ? t.controls.drawOnSlide : t.controls.drawSpotlight}
         </button>
         {showDrawing && (
           <>
             <Segmented
               options={[
-                { label: "Pen", selected: effectiveTool === "PEN", onClick: () => setTool("PEN") },
-                { label: "Marker", selected: effectiveTool === "MARKER", onClick: () => setTool("MARKER") },
+                { label: t.controls.pen, selected: effectiveTool === "PEN", onClick: () => setTool("PEN") },
+                { label: t.controls.marker, selected: effectiveTool === "MARKER", onClick: () => setTool("MARKER") },
                 ...(slidesMode
                   ? []
-                  : [{ label: "Spotlight", selected: effectiveTool === "SPOTLIGHT", onClick: () => setTool("SPOTLIGHT") }]),
+                  : [{ label: t.controls.spotlight, selected: effectiveTool === "SPOTLIGHT", onClick: () => setTool("SPOTLIGHT") }]),
               ]}
             />
             <DrawingSurface
@@ -222,31 +223,33 @@ function Segmented({
 }
 
 function ConnectedHeader({ sessionName, onDisconnect }: { sessionName: string; onDisconnect: () => void }) {
+  const { t } = useI18n();
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2 text-sm text-white/70">
         <span className="inline-block h-2 w-2 rounded-full bg-green-400" aria-hidden="true" />
-        Connected{sessionName ? ` · ${sessionName}` : ""}
+        {t.controls.connected}{sessionName ? ` · ${sessionName}` : ""}
       </div>
       <button
         type="button"
         onClick={onDisconnect}
         className="rounded-full border border-ink-line px-3 py-1.5 text-sm text-white/70 transition hover:text-white"
       >
-        Disconnect
+        {t.controls.disconnect}
       </button>
     </div>
   );
 }
 
 function SlideIndicator({ index, total }: { index: number; total: number }) {
+  const { t } = useI18n();
   return (
     <div className="rounded-2xl border border-ink-line bg-ink-soft/40 px-6 py-5 text-center">
       <div className="font-mono text-4xl font-semibold tracking-tight">
         {total > 0 ? index + 1 : 0}
         <span className="text-white/40"> / {total}</span>
       </div>
-      <p className="mt-1 text-xs uppercase tracking-widest text-white/45">Slide</p>
+      <p className="mt-1 text-xs uppercase tracking-widest text-white/45">{t.controls.slideLabel}</p>
     </div>
   );
 }
@@ -273,6 +276,7 @@ function NavButton({
 }
 
 function GoToControl({ total, onGoTo }: { total: number; onGoTo: (index: number) => void }) {
+  const { t } = useI18n();
   const [value, setValue] = useState("");
   return (
     <form
@@ -288,8 +292,8 @@ function GoToControl({ total, onGoTo }: { total: number; onGoTo: (index: number)
         inputMode="numeric"
         value={value}
         onChange={(e) => setValue(e.target.value.replace(/\D/g, ""))}
-        aria-label={`Go to slide (1 to ${total})`}
-        placeholder="Go to"
+        aria-label={t.controls.goToAria.replace("{total}", String(total))}
+        placeholder={t.controls.goTo}
         className="w-full rounded-xl border border-ink-line bg-ink px-3 text-center font-mono outline-none focus:border-beam"
       />
     </form>
@@ -297,17 +301,18 @@ function GoToControl({ total, onGoTo }: { total: number; onGoTo: (index: number)
 }
 
 function NotesPane({ notes, hasNotes }: { notes: string | null; hasNotes: boolean }) {
+  const { t } = useI18n();
   return (
     <section aria-labelledby="notes-heading" className="rounded-2xl border border-ink-line bg-ink p-4">
       <h2 id="notes-heading" className="text-xs font-semibold uppercase tracking-widest text-white/45">
-        Speaker notes
+        {t.controls.speakerNotes}
       </h2>
       <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-white/80">
         {notes
           ? notes
           : hasNotes
-            ? "No notes for this slide."
-            : "This deck has no notes sidecar."}
+            ? t.controls.noNotesForSlide
+            : t.controls.noNotesSidecar}
       </p>
     </section>
   );
@@ -322,6 +327,7 @@ function TimerPanel({
 }) {
   // Read a shared ticking clock so the display advances between host updates
   // without calling Date.now() during render.
+  const { t } = useI18n();
   const now = useWallClock();
   const elapsed = timer.running
     ? timer.elapsedMs + Math.max(0, now - timer.anchorAt)
@@ -331,7 +337,7 @@ function TimerPanel({
     <section aria-labelledby="timer-heading" className="rounded-2xl border border-ink-line bg-ink-soft/40 p-4">
       <div className="flex items-center justify-between">
         <h2 id="timer-heading" className="text-xs font-semibold uppercase tracking-widest text-white/45">
-          Timer
+          {t.controls.timer}
         </h2>
         <span className="font-mono text-2xl tabular-nums" aria-live="off">
           {formatElapsed(elapsed)}
@@ -339,10 +345,10 @@ function TimerPanel({
       </div>
       <div className="mt-3 grid grid-cols-3 gap-2">
         <TimerButton onClick={() => onTimer(timer.running ? "PAUSE" : "START")}>
-          {timer.running ? "Pause" : "Start"}
+          {timer.running ? t.controls.pause : t.controls.start}
         </TimerButton>
-        <TimerButton onClick={() => onTimer("PAUSE")}>Pause</TimerButton>
-        <TimerButton onClick={() => onTimer("RESET")}>Reset</TimerButton>
+        <TimerButton onClick={() => onTimer("PAUSE")}>{t.controls.pause}</TimerButton>
+        <TimerButton onClick={() => onTimer("RESET")}>{t.controls.reset}</TimerButton>
       </div>
     </section>
   );

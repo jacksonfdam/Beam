@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { RemoteState } from "@/lib/beam-remote";
+import { LanguageSwitcher, useI18n } from "@/lib/i18n";
 
 interface Props {
   state: RemoteState;
@@ -14,6 +15,7 @@ interface Props {
  * and PIN shown on the presenter screen (a wrong PIN is rejected).
  */
 export function PairingForm({ state, onConnect, onCancel }: Props) {
+  const { t } = useI18n();
   const [host, setHost] = useState("");
   const [pin, setPin] = useState("");
   const [name, setName] = useState("");
@@ -28,15 +30,16 @@ export function PairingForm({ state, onConnect, onCancel }: Props) {
         if (valid && !busy) onConnect(host, pin, name);
       }}
     >
-      <h1 className="text-2xl font-semibold tracking-tight">Connect to a host</h1>
-      <p className="mt-2 text-sm text-white/60">
-        Enter the host IP and PIN shown on the presenter screen.
-      </p>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight">{t.pairing.title}</h1>
+        <LanguageSwitcher />
+      </div>
+      <p className="mt-2 text-sm text-white/60">{t.pairing.subtitle}</p>
 
       <div className="mt-6 space-y-4">
         <div>
           <label htmlFor="host" className="block text-sm font-medium text-white/80">
-            Host IP
+            {t.pairing.hostIp}
           </label>
           <input
             id="host"
@@ -50,13 +53,13 @@ export function PairingForm({ state, onConnect, onCancel }: Props) {
             placeholder="192.168.0.8"
           />
           <p id="host-hint" className="mt-1 text-xs text-white/45">
-            Port is optional — defaults to 53317.
+            {t.pairing.portHint}
           </p>
         </div>
 
         <div>
           <label htmlFor="pin" className="block text-sm font-medium text-white/80">
-            PIN
+            {t.pairing.pin}
           </label>
           <input
             id="pin"
@@ -70,7 +73,7 @@ export function PairingForm({ state, onConnect, onCancel }: Props) {
 
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-white/80">
-            Your name <span className="text-white/40">(optional)</span>
+            {t.pairing.yourName} <span className="text-white/40">{t.pairing.optional}</span>
           </label>
           <input
             id="name"
@@ -95,7 +98,7 @@ export function PairingForm({ state, onConnect, onCancel }: Props) {
           disabled={!valid || busy}
           className="flex-1 rounded-full bg-beam px-5 py-3 font-semibold text-ink transition hover:bg-beam-bright disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {busy ? "Connecting…" : "Connect"}
+          {busy ? t.pairing.connecting : t.pairing.connect}
         </button>
         {busy && (
           <button
@@ -103,7 +106,7 @@ export function PairingForm({ state, onConnect, onCancel }: Props) {
             onClick={onCancel}
             className="rounded-full border border-ink-line px-5 py-3 font-medium text-white/80 transition hover:text-white"
           >
-            Cancel
+            {t.pairing.cancel}
           </button>
         )}
       </div>

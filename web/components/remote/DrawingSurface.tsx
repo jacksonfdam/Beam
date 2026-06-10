@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useI18n } from "@/lib/i18n";
 
 export type DrawTool = "PEN" | "MARKER" | "SPOTLIGHT";
 
@@ -30,6 +31,7 @@ interface Stroke {
  * (0..1) coordinates so strokes land at the right spot on the host.
  */
 export function DrawingSurface({ image, aspect, tool, onBegin, onExtend, onEnd, onClear, onSpotlight }: Props) {
+  const { t } = useI18n();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const scale = useRef(1);
@@ -238,7 +240,7 @@ export function DrawingSurface({ image, aspect, tool, onBegin, onExtend, onEnd, 
         ref={canvasRef}
         style={{ aspectRatio: String(imgAspect ?? aspect) }}
         className="w-full touch-none rounded-xl border border-ink-line bg-ink"
-        aria-label="Drawing surface — one finger draws, two fingers zoom"
+        aria-label={t.controls.drawingAria}
         role="img"
         onPointerDown={onDown}
         onPointerMove={onMove}
@@ -258,14 +260,14 @@ export function DrawingSurface({ image, aspect, tool, onBegin, onExtend, onEnd, 
           }}
           className="rounded-full border border-ink-line px-4 py-2 text-sm font-medium text-white/80 transition hover:text-white"
         >
-          Clear ink
+          {t.controls.clearInk}
         </button>
         <button
           type="button"
           onClick={resetZoom}
           className="rounded-full border border-ink-line px-4 py-2 text-sm font-medium text-white/80 transition hover:text-white"
         >
-          Reset zoom
+          {t.controls.resetZoom}
         </button>
       </div>
     </div>
