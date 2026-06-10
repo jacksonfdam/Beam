@@ -39,15 +39,15 @@ export default function RemotePage() {
         ) : (
           <PairingForm
             state={r.state}
-            onConnect={(code, name) => r.connect(code, name)}
+            onConnect={(host, pin, name) => r.connect(host, pin, name)}
             onCancel={r.disconnect}
           />
         )}
       </div>
 
       <p className="mt-10 text-center text-xs text-white/40">
-        Pairing uses a server only for the initial handshake. Slides, notes, and
-        ink travel directly between your browser and the host.
+        The browser connects directly to the host over your local network. Open
+        this page over http (not https) so the browser allows the connection.
       </p>
     </main>
   );

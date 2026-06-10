@@ -1,11 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BeamRemote, type RemoteState } from "@/lib/beam-remote";
+import type { RemoteState } from "@/lib/beam-remote";
+import { BeamWsRemote } from "@/lib/beam-ws-remote";
 import {
   ClientMsg,
+  DEFAULT_PORT,
   normPoint,
+  parseEndpoint,
   type DeckInfo,
+  type HostEndpoint,
   type HostMessage,
   type NavAction,
   type TimerAction,
@@ -40,8 +44,23 @@ const EMPTY: Presentation = {
   lastError: null,
 };
 
+/** Accept a `beam://` link, an `ip:port`, or a bare IP (default port). */
+function buildEndpoint(host: string, pin: string): HostEndpoint | null {
+  const trimmed = host.trim();
+  if (!trimmed) return null;
+  if (trimmed.includes("://")) return parseEndpoint(trimmed);
+  const cleanPin = pin.trim() || null;
+  const parts = trimmed.split(":");
+  if (parts.length === 2) {
+    const port = Number.parseInt(parts[1], 10);
+    if (Number.isNaN(port)) return null;
+    return { host: parts[0], port, pin: cleanPin };
+  }
+  return { host: trimmed, port: DEFAULT_PORT, pin: cleanPin };
+}
+
 export function useBeamRemote() {
-  const remoteRef = useRef<BeamRemote | null>(null);
+  const remoteRef = useRef<BeamWsRemote | null>(null);
   const strokeCounter = useRef(0);
   const [state, setState] = useState<RemoteState>({ phase: "idle" });
   const [presentation, setPresentation] = useState<Presentation>(EMPTY);
@@ -51,12 +70,14 @@ export function useBeamRemote() {
   }, []);
 
   const connect = useCallback(
-    (sessionCode: string, clientName: string, pin?: string) => {
+    (host: string, pin: string, clientName: string) => {
+      const endpoint = buildEndpoint(host, pin);
+      if (!endpoint) return;
       remoteRef.current?.close();
       setPresentation(EMPTY);
-      const remote = new BeamRemote({ onState: setState, onHostMessage });
+      const remote = new BeamWsRemote({ onState: setState, onHostMessage });
       remoteRef.current = remote;
-      void remote.connect(sessionCode.trim(), clientName.trim() || "Browser", pin?.trim() || undefined);
+      remote.connect(endpoint, clientName.trim() || "Browser");
     },
     [onHostMessage],
   );

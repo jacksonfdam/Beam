@@ -3,57 +3,69 @@
 import { useState } from "react";
 import type { RemoteState } from "@/lib/beam-remote";
 
-const CODE_RE = /^[A-Za-z0-9]{4,16}$/;
-
 interface Props {
   state: RemoteState;
-  onConnect: (sessionCode: string, name: string) => void;
+  onConnect: (host: string, pin: string, name: string) => void;
   onCancel: () => void;
 }
 
 /**
- * The session code shown on the presenter screen is used both to pair through
- * signaling AND as the PIN in the Beam handshake — a wrong code is rejected.
+ * The browser connects straight to the host's LAN WebSocket. Enter the host IP
+ * and PIN shown on the presenter screen (a wrong PIN is rejected).
  */
 export function PairingForm({ state, onConnect, onCancel }: Props) {
-  const [code, setCode] = useState("");
+  const [host, setHost] = useState("");
+  const [pin, setPin] = useState("");
   const [name, setName] = useState("");
   const busy = state.phase === "connecting" || state.phase === "handshaking";
-  const valid = CODE_RE.test(code.trim());
+  const valid = host.trim().length > 0;
 
   return (
     <form
       className="mx-auto w-full max-w-sm rounded-2xl border border-ink-line bg-ink-soft/40 p-6"
       onSubmit={(e) => {
         e.preventDefault();
-        if (valid && !busy) onConnect(code.trim(), name);
+        if (valid && !busy) onConnect(host, pin, name);
       }}
     >
       <h1 className="text-2xl font-semibold tracking-tight">Connect to a host</h1>
       <p className="mt-2 text-sm text-white/60">
-        Enter the session code shown on the presenter screen.
+        Enter the host IP and PIN shown on the presenter screen.
       </p>
 
       <div className="mt-6 space-y-4">
         <div>
-          <label htmlFor="code" className="block text-sm font-medium text-white/80">
-            Session code
+          <label htmlFor="host" className="block text-sm font-medium text-white/80">
+            Host IP
           </label>
           <input
-            id="code"
+            id="host"
             inputMode="text"
             autoComplete="off"
-            autoCapitalize="characters"
             autoFocus
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            aria-describedby="code-hint"
+            value={host}
+            onChange={(e) => setHost(e.target.value)}
+            aria-describedby="host-hint"
+            className="mt-1 w-full rounded-xl border border-ink-line bg-ink px-4 py-3 font-mono text-white outline-none focus:border-beam"
+            placeholder="192.168.0.8"
+          />
+          <p id="host-hint" className="mt-1 text-xs text-white/45">
+            Port is optional — defaults to 53317.
+          </p>
+        </div>
+
+        <div>
+          <label htmlFor="pin" className="block text-sm font-medium text-white/80">
+            PIN
+          </label>
+          <input
+            id="pin"
+            inputMode="numeric"
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
             className="mt-1 w-full rounded-xl border border-ink-line bg-ink px-4 py-3 font-mono text-lg tracking-[0.3em] text-white outline-none focus:border-beam"
             placeholder="4821"
           />
-          <p id="code-hint" className="mt-1 text-xs text-white/45">
-            4–16 letters or digits.
-          </p>
         </div>
 
         <div>
