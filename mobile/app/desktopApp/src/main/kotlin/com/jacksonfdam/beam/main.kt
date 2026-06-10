@@ -51,6 +51,7 @@ fun main() = application {
             scope = appScope,
             sessionName = hostName(),
             encodeSlide = { document, index -> SlidePng.encode(document, index) },
+            screenAspect = screenAspect(),
         )
         s
     }
@@ -117,9 +118,11 @@ fun main() = application {
         transparent = true,
         resizable = false,
         alwaysOnTop = true,
-        visible = state.presentMode == PresentMode.SCREEN && state.strokes.isNotEmpty(),
+        visible = state.presentMode == PresentMode.SCREEN &&
+            !state.interacting &&
+            (state.strokes.isNotEmpty() || state.spotlight != null),
     ) {
-        InkOverlayScreen(state.strokes)
+        InkOverlayScreen(state.strokes, state.spotlight)
     }
 }
 
@@ -149,4 +152,9 @@ private fun projectorPosition(): WindowPosition {
 private fun projectorSize(): DpSize {
     val bounds = targetScreenBounds()
     return DpSize(bounds.width.dp, bounds.height.dp)
+}
+
+private fun screenAspect(): Float {
+    val bounds = targetScreenBounds()
+    return if (bounds.height > 0) bounds.width.toFloat() / bounds.height.toFloat() else 16f / 9f
 }

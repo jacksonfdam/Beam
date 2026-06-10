@@ -18,6 +18,16 @@ data class HostState(
     val timerRunning: Boolean = false,
     val strokes: List<InkStroke> = emptyList(),
     val presentMode: PresentMode = PresentMode.SLIDES,
+    val interacting: Boolean = false,
+    val spotlight: SpotlightRect? = null,
 ) {
     val hasDeck: Boolean get() = currentDeckId != null && slideTotal > 0
 }
+
+/** A normalized (0..1) region to spotlight on the projected screen. */
+data class SpotlightRect(
+    val left: Float,
+    val top: Float,
+    val right: Float,
+    val bottom: Float,
+)

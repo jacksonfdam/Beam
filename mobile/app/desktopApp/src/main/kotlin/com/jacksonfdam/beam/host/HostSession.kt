@@ -15,7 +15,9 @@ import com.jacksonfdam.beam.protocol.Ping
 import com.jacksonfdam.beam.protocol.Pong
 import com.jacksonfdam.beam.protocol.PresenterServer
 import com.jacksonfdam.beam.protocol.SelectDeck
+import com.jacksonfdam.beam.protocol.SetInteracting
 import com.jacksonfdam.beam.protocol.SetMode
+import com.jacksonfdam.beam.protocol.Spotlight
 import com.jacksonfdam.beam.pdf.PdfDocument
 import com.jacksonfdam.beam.protocol.SlideChanged
 import com.jacksonfdam.beam.protocol.SlideImage
@@ -47,6 +49,7 @@ class HostSession(
     private val scope: CoroutineScope,
     val sessionName: String,
     private val encodeSlide: (PdfDocument, Int) -> String? = { _, _ -> null },
+    private val screenAspect: Float = 16f / 9f,
 ) {
     private val decks = LinkedHashMap<String, HostDeck>()
     private val strokes = LinkedHashMap<Long, InkStroke>()
@@ -111,6 +114,27 @@ class HostSession(
 
             is Ping -> server.broadcast(Pong)
             is SetMode -> setMode(msg.mode)
+            is SetInteracting -> _state.update { it.copy(interacting = msg.interacting) }
+            is Spotlight -> spotlight(msg)
+        }
+    }
+
+    private var spotlightToken = 0
+
+    private fun spotlight(msg: Spotlight) {
+        val empty = (msg.right - msg.left) <= 0f || (msg.bottom - msg.top) <= 0f
+        if (empty) {
+            _state.update { it.copy(spotlight = null) }
+            return
+        }
+        val token = ++spotlightToken
+        _state.update {
+            it.copy(spotlight = SpotlightRect(msg.left, msg.top, msg.right, msg.bottom))
+        }
+        // Auto-clear after a few seconds (unless a newer spotlight replaced it).
+        scope.launch {
+            delay(4000)
+            if (token == spotlightToken) _state.update { it.copy(spotlight = null) }
         }
     }
 
@@ -234,5 +258,5 @@ class HostSession(
     }
 
     /** Build the HelloAck the transport sends to each newly accepted client. */
-    fun helloAck(): HelloAck = HelloAck(sessionName, HOST_VERSION, _state.value.decks)
+    fun helloAck(): HelloAck = HelloAck(sessionName, HOST_VERSION, _state.value.decks, screenAspect)
 }
