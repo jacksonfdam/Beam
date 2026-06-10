@@ -1,7 +1,7 @@
 # Beam — native apps
 
 Beam turns any exported PDF (Keynote, PowerPoint, Canva, Figma) into a flawless
-fullscreen presentation, controlled from a phone. Local-first, LocalSend-style:
+fullscreen presentation, controlled from a phone. Local-first:
 no accounts, no cloud storage of user content, devices discover and talk to each
 other directly over the LAN. **Open → Present → Done.**
 
@@ -56,16 +56,17 @@ file (`DeckNotes` in `:core`) and pushes the current slide's note on
 Keys are zero-based slide indices; missing indices simply have no notes. The
 file is read by the host only — it never leaves the device.
 
-## Build status
+## Status
 
-- [x] Milestone 2 — `:core` wire protocol + JSON round-trip tests.
-- [x] Milestone 3 — `:transport` Ktor server/client + handshake + PIN (handshake tests in `:transport` jvmTest).
-- [x] Milestone 4 — `:pdf` rendering (Android `PdfRenderer`, iOS CoreGraphics, Desktop PDFBox) + notes sidecar.
-- [x] Milestone 5 — Desktop presenter: load PDF, fullscreen projector on the external display, QR/IP/PIN, presenter view, live ink overlay.
-- [x] Milestone 6 — Mobile remote (shared Compose): manual connect, deck picker, navigation, slide indicator, notes, timer, drawing. QR scan is an `expect/actual` seam (manual entry is the always-working fallback).
-- [ ] Milestone 6 — Mobile remote (connect, deck picker, navigation, notes).
-- [ ] Milestone 7 — Live ink overlay.
-- [ ] Milestone 8 — Host-owned timer + reconnect-survives-state.
+The native flow works end to end: `:core` wire protocol (with round-trip
+tests), `:transport` Ktor server/client with the PIN handshake (handshake tests
+in `:transport` jvmTest), `:pdf` rendering on all three platforms plus the notes
+sidecar, the desktop presenter (load PDF, fullscreen projector on the external
+display, QR/IP/PIN, presenter view, live ink), and the shared-Compose remote
+(connect, deck picker, navigation, slide indicator, notes, host-owned timer,
+drawing, reconnect-restores-state). The UI is localized (EN/PT-BR/ES/SV). QR
+scanning is an `expect/actual` seam with manual entry as the always-working
+fallback; on-device camera scanning is still being polished.
 
 ---
 

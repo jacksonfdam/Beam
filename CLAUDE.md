@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What Beam is
 
 Beam turns an exported PDF (Keynote, PowerPoint, Canva, Figma) into a fullscreen presentation
-controlled from a phone. **Local-first, LocalSend-style**: no accounts, no cloud storage of user
+controlled from a phone. **Local-first**: no accounts, no cloud storage of user
 content, no telemetry. Devices discover and talk to each other directly over the LAN. The *only*
 thing that may ever touch a server is the WebRTC signaling handshake for the optional browser
 remote — never slide content, notes, or ink. This constraint is load-bearing: do not introduce
@@ -14,7 +14,7 @@ account systems, analytics, or server-side storage of decks/notes/strokes.
 ## Monorepo layout
 
 ```
-files/    Canonical build prompts + BeamProtocol.kt (the wire-protocol spec). Read-only reference.
+files/    BeamProtocol.kt — the wire-protocol spec copy (canonical lives in :core). Read-only reference.
 mobile/   Kotlin Multiplatform — desktop presenter/host + Android/iOS remote. Gradle.
 web/      Next.js — landing page + browser remote + WebRTC signaling. npm.
 ```

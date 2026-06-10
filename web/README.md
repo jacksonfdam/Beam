@@ -11,7 +11,7 @@ responsibilities, shipped in this order:
 
 ## Philosophy
 
-Local-first, LocalSend-style: no accounts, no user content stored server-side,
+Local-first: no accounts, no user content stored server-side,
 no telemetry. The server's only job for the remote is brokering the WebRTC
 signaling handshake. Slide content, navigation, notes, and ink travel
 peer-to-peer over the DataChannel and never touch the server.
@@ -87,11 +87,9 @@ which is out of scope here.
 
 ## Status
 
-- [x] Milestone 1 — Next.js + TypeScript scaffold.
-- [x] Milestone 2 — Landing page.
-- [x] Milestone 3 — Signaling functions + TTL store (validation, rate limiting, tests).
-- [x] Milestone 4 — `lib/protocol.ts` mirror.
-- [x] Milestone 5 — `/remote` pairing + DataChannel.
-- [x] Milestone 6 — Remote control surface.
-- [x] Milestone 7 — Optional timer + drawing.
-- [ ] Milestone 8 — Polish + a11y pass (ongoing).
+Built and tested: the Next.js + TypeScript app, the landing page, the signaling
+functions with their TTL store (input validation, rate limiting, unit tests),
+the `lib/protocol.ts` mirror, the `/remote` pairing + control surface (mode
+toggles, navigation, notes, timer, drawing/spotlight), and full i18n
+(EN/PT-BR/ES/SV) with a language switcher. Ongoing: a polish + accessibility
+pass, and the desktop-side WebRTC peer needed to complete in-browser pairing.
