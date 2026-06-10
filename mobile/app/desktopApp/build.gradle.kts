@@ -13,6 +13,7 @@ dependencies {
     implementation(projects.pdf)
 
     implementation(compose.desktop.currentOs)
+    implementation(compose.material3)
     implementation(libs.kotlinx.coroutinesSwing)
     implementation(libs.qrose)
 

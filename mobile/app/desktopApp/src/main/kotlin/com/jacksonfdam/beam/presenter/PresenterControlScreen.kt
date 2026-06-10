@@ -36,8 +36,14 @@ fun PresenterControlScreen(
     deck: HostDeck?,
     onOpenDeck: () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             Text("Beam", style = MaterialTheme.typography.headlineSmall)
             Box(Modifier.weight(1f))
             Text(
@@ -48,9 +54,15 @@ fun PresenterControlScreen(
             Button(onClick = onOpenDeck) { Text(if (deck == null) "Open a PDF" else "Open another PDF") }
         }
 
-        Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             // Left: current slide + next.
-            Column(modifier = Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.weight(2f),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 CurrentSlide(state, deck, modifier = Modifier.weight(1f))
                 NextSlide(state, deck)
             }
@@ -60,7 +72,13 @@ fun PresenterControlScreen(
                 modifier = Modifier.width(280.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                state.endpoint?.let { ConnectionCard(it, state.pin, modifier = Modifier.fillMaxWidth()) }
+                state.endpoint?.let {
+                    ConnectionCard(
+                        it,
+                        state.pin,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                 TimerCard(state.timerElapsedMs, state.timerRunning)
                 NotesCard(state.currentNotes, deck != null)
             }
@@ -77,11 +95,27 @@ private fun CurrentSlide(state: HostState, deck: HostDeck?, modifier: Modifier =
                 style = MaterialTheme.typography.titleMedium,
             )
             val preview = remember(deck?.info?.id, state.slideIndex) {
-                deck?.let { runCatching { SlideImages.render(it.document, state.slideIndex, 1280) }.getOrNull() }
+                deck?.let {
+                    runCatching {
+                        SlideImages.render(
+                            it.document,
+                            state.slideIndex,
+                            1280
+                        )
+                    }.getOrNull()
+                }
             }
-            Box(Modifier.fillMaxSize().background(Color.Black).clip(RoundedCornerShape(6.dp)), contentAlignment = Alignment.Center) {
+            Box(
+                Modifier.fillMaxSize().background(Color.Black).clip(RoundedCornerShape(6.dp)),
+                contentAlignment = Alignment.Center
+            ) {
                 if (preview != null) {
-                    Image(preview, contentDescription = "Current slide", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
+                    Image(
+                        preview,
+                        contentDescription = "Current slide",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
                 } else {
                     Text("Open a PDF and press Start on a remote", color = Color.Gray)
                 }
@@ -94,16 +128,40 @@ private fun CurrentSlide(state: HostState, deck: HostDeck?, modifier: Modifier =
 private fun NextSlide(state: HostState, deck: HostDeck?) {
     val hasNext = state.slideIndex + 1 < state.slideTotal
     val next = remember(deck?.info?.id, state.slideIndex) {
-        deck?.takeIf { hasNext }?.let { runCatching { SlideImages.render(it.document, state.slideIndex + 1, 640) }.getOrNull() }
+        deck?.takeIf { hasNext }?.let {
+            runCatching {
+                SlideImages.render(
+                    it.document,
+                    state.slideIndex + 1,
+                    640
+                )
+            }.getOrNull()
+        }
     }
     Card {
-        Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text("Next", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
-            Box(Modifier.width(160.dp).aspectRatio(16f / 9f).background(Color.Black).clip(RoundedCornerShape(4.dp)), contentAlignment = Alignment.Center) {
+            Box(
+                Modifier.width(160.dp).aspectRatio(16f / 9f).background(Color.Black)
+                    .clip(RoundedCornerShape(4.dp)), contentAlignment = Alignment.Center
+            ) {
                 if (next != null) {
-                    Image(next, contentDescription = "Next slide", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
+                    Image(
+                        next,
+                        contentDescription = "Next slide",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
                 } else {
-                    Text(if (hasNext) "…" else "End", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        if (hasNext) "…" else "End",
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
         }
@@ -116,7 +174,11 @@ private fun TimerCard(elapsedMs: Long, running: Boolean) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("Timer", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
             Text(formatElapsed(elapsedMs), style = MaterialTheme.typography.headlineMedium)
-            Text(if (running) "Running" else "Paused", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(
+                if (running) "Running" else "Paused",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
         }
     }
 }
