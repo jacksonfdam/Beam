@@ -155,10 +155,12 @@ npm test                         # TS protocol mirror + signaling validation/sto
 
 The landing page, the `/remote` UI, and the signaling functions are built and
 testable, **but browser↔desktop pairing does not complete yet**: the desktop
-still needs a WebRTC peer that answers the signaling handshake. Today the desktop
-speaks only the LAN WebSocket the **native** remote uses. So: landing ✅,
-signaling endpoints ✅, full in-browser pairing ❌ until that desktop WebRTC peer
-exists.
+still needs a WebRTC peer that answers the signaling handshake. 
+
+Today the desktop speaks only the LAN WebSocket the **native** remote uses. 
+
+So: landing ✅, signaling endpoints ✅, full in-browser pairing ❌ until that 
+desktop WebRTC peer exists.
 
 ## Internationalization (EN, PT-BR, ES, SV)
 
@@ -187,14 +189,6 @@ Persisting the native app's language choice across launches (via `ConnectionStor
 and detecting the system locale are small follow-ups; today it defaults to English
 and is switched in-app.
 
-## Landing site (`landing/`)
-
-A standalone static marketing page (single `index.html`, no build step),
-multilingual, with slots for demo videos. Deploy to Vercel with **Root Directory =
-`landing`** and Framework Preset **Other**, or `cd landing && vercel --prod`. Drop
-clips into `landing/videos/` (see `landing/README.md` for the expected filenames);
-each card falls back to a labelled placeholder until its file exists. This is
-separate from the in-app landing served by the Next.js `web/` project.
 
 ## Troubleshooting
 
@@ -210,7 +204,9 @@ separate from the in-app landing served by the Next.js `web/` project.
 The two primary paths work end to end: the **web landing page**, and the
 **desktop host ↔ native Android/iOS remote** over Wi‑Fi — navigation, the
 host-owned timer, live ink, speaker notes, reconnect-restores-state, and
-wrong-PIN rejection. The UI is localized (EN / PT-BR / ES / SV) with an in-app
+wrong-PIN rejection. 
+
+The UI is localized (EN / PT-BR / ES / SV) with an in-app
 switcher, the Beam icon is wired across web, mobile, and favicons, and the
 standalone landing site is ready to deploy.
 
@@ -220,7 +216,9 @@ error/empty states, and an accessibility pass.
 
 ## Privacy
 
-No accounts, no cloud storage of decks/notes/strokes, no telemetry. On the native
-flow everything stays on your LAN, peer-to-peer between your devices. The browser
-remote uses a server only to exchange the initial WebRTC handshake (a session
+No accounts, no cloud storage of decks/notes/strokes, no telemetry. 
+
+On the native flow everything stays on your LAN, peer-to-peer between your devices. 
+
+The browser remote uses a server only to exchange the initial WebRTC handshake (a session
 code and connection details) with a short TTL — never slide content.
