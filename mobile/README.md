@@ -44,7 +44,7 @@ hierarchies discriminated by a `"type"` key via `BeamJson`. Ink is normalized
 ## Build status
 
 - [x] Milestone 2 — `:core` wire protocol + JSON round-trip tests.
-- [ ] Milestone 3 — `:transport` Ktor server/client + handshake + PIN.
+- [x] Milestone 3 — `:transport` Ktor server/client + handshake + PIN (handshake tests in `:transport` jvmTest).
 - [ ] Milestone 4 — `:pdf` rendering (Android / iOS / Desktop).
 - [ ] Milestone 5 — Desktop presenter (load PDF, fullscreen, QR/IP, presenter view).
 - [ ] Milestone 6 — Mobile remote (connect, deck picker, navigation, notes).
