@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.jacksonfdam.beam.remote.AndroidConnectionStore
 import com.jacksonfdam.beam.remote.ui.BeamRemoteApp
 
 class MainActivity : ComponentActivity() {
@@ -13,8 +14,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
+        val store = AndroidConnectionStore(applicationContext)
         setContent {
-            BeamRemoteApp()
+            BeamRemoteApp(store)
         }
     }
 }

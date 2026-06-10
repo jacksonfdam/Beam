@@ -35,9 +35,14 @@ fun PairingScreen(
     presentation: Presentation,
     controller: RemoteController,
 ) {
-    var host by remember { mutableStateOf("") }
-    var pin by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
+    val saved = remember { controller.lastSaved() }
+    var host by remember {
+        mutableStateOf(
+            saved?.let { if (it.port == DEFAULT_PORT) it.host else "${it.host}:${it.port}" } ?: "",
+        )
+    }
+    var pin by remember { mutableStateOf(saved?.pin ?: "") }
+    var name by remember { mutableStateOf(saved?.name ?: "") }
 
     val busy = connection is ConnectionState.Connecting || connection is ConnectionState.Handshaking
     val error = (connection as? ConnectionState.Failed)?.reason ?: presentation.lastError
