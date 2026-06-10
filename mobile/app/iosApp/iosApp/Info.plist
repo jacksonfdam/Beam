@@ -8,5 +8,11 @@
 	<string>Beam uses the camera to scan the connection QR code on the presenter screen.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Beam connects to the presenter on your local network.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Allow cleartext ws:// to the host on the local network (LAN only). -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 </dict>
 </plist>
