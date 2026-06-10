@@ -1,0 +1,236 @@
+#!/usr/bin/env bash
+#
+# Beam dev console — an interactive REPL to set up and run the whole monorepo.
+#
+#   ./dev.sh            # interactive console (type `help`)
+#   ./dev.sh <command>  # run one command and exit (e.g. ./dev.sh web)
+#
+# Commands: setup · web · desktop [hot] · android · ios · status · logs <name>
+#           stop [web|desktop|all] · help · quit
+#
+# Long-running things (web dev server, desktop app) run in the background with
+# PIDs and logs under .dev/. One-shot things (android/ios install) run in the
+# foreground so you see the build output.
+
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WEB="$ROOT/web"
+MOBILE="$ROOT/mobile"
+STATE="$ROOT/.dev"
+PORT=53317
+WEB_PORT=3000
+ANDROID_PKG="com.jacksonfdam.beam"
+ANDROID_ACTIVITY="$ANDROID_PKG/.MainActivity"
+IOS_PROJ="$MOBILE/app/iosApp/iosApp.xcodeproj"
+IOS_SCHEME="iosApp"
+mkdir -p "$STATE"
+
+# ---- pretty output --------------------------------------------------------
+if [ -t 1 ]; then
+  B=$'\e[1m'; D=$'\e[2m'; R=$'\e[31m'; G=$'\e[32m'; Y=$'\e[33m'; BL=$'\e[34m'; C=$'\e[36m'; X=$'\e[0m'
+else B=; D=; R=; G=; Y=; BL=; C=; X=; fi
+info(){ printf "${C}▸${X} %s\n" "$*"; }
+ok(){   printf "${G}✓${X} %s\n" "$*"; }
+warn(){ printf "${Y}!${X} %s\n" "$*"; }
+err(){  printf "${R}✗${X} %s\n" "$*"; }
+have(){ command -v "$1" >/dev/null 2>&1; }
+
+# ---- background process helpers -------------------------------------------
+pidfile(){ echo "$STATE/$1.pid"; }
+logfile(){ echo "$STATE/$1.log"; }
+is_running(){ local f; f="$(pidfile "$1")"; [ -f "$f" ] && kill -0 "$(cat "$f" 2>/dev/null)" 2>/dev/null; }
+
+start_bg(){ # name  workdir  command...
+  local name="$1" wd="$2"; shift 2
+  if is_running "$name"; then warn "$name is already running (pid $(cat "$(pidfile "$name")"))."; return 0; fi
+  ( cd "$wd" && nohup "$@" >"$(logfile "$name")" 2>&1 & echo $! >"$(pidfile "$name")" )
+  sleep 1
+  if is_running "$name"; then
+    ok "$name started (pid $(cat "$(pidfile "$name")")) — logs: ${D}.dev/$name.log${X}"
+  else
+    err "$name failed to start. Last lines:"; tail -n 12 "$(logfile "$name")" 2>/dev/null | sed 's/^/    /'
+  fi
+}
+
+stop_bg(){ # name
+  local name="$1" f; f="$(pidfile "$name")"
+  if is_running "$name"; then
+    kill "$(cat "$f")" 2>/dev/null; sleep 1; kill -9 "$(cat "$f")" 2>/dev/null
+    rm -f "$f"; ok "$name stopped."
+  else
+    rm -f "$f"; info "$name was not running."
+  fi
+}
+
+free_port(){
+  local pids; pids="$(lsof -ti :$PORT 2>/dev/null || true)"
+  if [ -n "$pids" ]; then echo "$pids" | xargs kill -9 2>/dev/null; ok "Freed port $PORT."; else info "Port $PORT is free."; fi
+}
+
+adb_serials(){ adb devices 2>/dev/null | awk 'NR>1 && $2=="device"{print $1}'; }
+
+# ---- commands -------------------------------------------------------------
+cmd_setup(){
+  info "Checking toolchain…"
+  have node && ok "node $(node -v)" || warn "node not found — needed for the web app (Node 20+)."
+  have npm  && ok "npm $(npm -v)"   || warn "npm not found."
+  if have java; then
+    local jv; jv="$(java -version 2>&1 | head -1)"
+    local major; major="$(printf "%s" "$jv" | sed -E 's/.*version "([0-9]+).*/\1/')"
+    if [ "${major:-0}" -ge 17 ] 2>/dev/null; then ok "java — $jv"; else warn "java is $jv — the mobile/desktop build needs JDK 17+."; fi
+  else warn "java not found — needed for the desktop/Android build (JDK 17+)."; fi
+  have adb && ok "adb present ($(adb_serials | wc -l | tr -d ' ') device(s))" || warn "adb not found — Android install will be unavailable."
+  have xcodebuild && ok "Xcode CLI present" || warn "xcodebuild not found — iOS install will be unavailable (macOS + Xcode only)."
+
+  if [ -d "$WEB/node_modules" ]; then ok "web deps already installed."
+  elif have npm; then info "Installing web deps (npm install)…"; ( cd "$WEB" && npm install ) && ok "web deps installed." || err "npm install failed."
+  fi
+
+  if [ -x "$MOBILE/gradlew" ]; then info "Warming the Gradle wrapper…"; ( cd "$MOBILE" && ./gradlew --version >/dev/null 2>&1 ) && ok "Gradle ready." || warn "Gradle warmup failed — check JDK."; fi
+  ok "Setup complete."
+}
+
+cmd_web(){
+  have npm || { err "npm not found."; return 1; }
+  [ -d "$WEB/node_modules" ] || { info "Installing web deps first…"; ( cd "$WEB" && npm install ) || { err "npm install failed."; return 1; }; }
+  start_bg web "$WEB" npm run dev
+  info "Landing: ${B}http://localhost:$WEB_PORT${X}  ·  remote: ${B}http://localhost:$WEB_PORT/remote${X}"
+}
+
+cmd_desktop(){ # [hot]
+  local task="run" label="desktop app (run)"
+  if [ "${1:-}" = "hot" ]; then task="hotRun --auto"; label="desktop app (hotRun --auto)"; fi
+  [ -x "$MOBILE/gradlew" ] || { err "mobile/gradlew not found."; return 1; }
+  info "Freeing port $PORT and stopping stale Gradle daemons…"
+  free_port
+  ( cd "$MOBILE" && ./gradlew --stop >/dev/null 2>&1 )
+  info "Launching $label …"
+  start_bg desktop "$MOBILE" bash -c "exec ./gradlew :app:desktopApp:$task"
+  [ "$task" != "run" ] && warn "If hotRun isn't a task, the Compose Hot Reload plugin isn't configured — use ${B}desktop${X} (plain run). Check .dev/desktop.log."
+  return 0
+}
+
+cmd_android(){
+  have adb || { err "adb not found (install Android platform-tools)."; return 1; }
+  local serials count serial; serials="$(adb_serials)"; count="$(printf "%s" "$serials" | grep -c . || true)"
+  if [ "$count" -eq 0 ]; then err "No Android device/emulator detected (adb devices)."; return 1; fi
+  serial="${BEAM_ADB_SERIAL:-$(printf "%s\n" "$serials" | head -1)}"
+  [ "$count" -gt 1 ] && warn "Multiple devices; using $serial (set BEAM_ADB_SERIAL to override)."
+  info "Building & installing the Android remote on $serial …"
+  ( cd "$MOBILE" && ./gradlew :app:androidApp:installDebug ) || { err "installDebug failed."; return 1; }
+  adb -s "$serial" shell am start -n "$ANDROID_ACTIVITY" >/dev/null 2>&1 && ok "Launched on $serial." || ok "Installed on $serial (launch it manually)."
+}
+
+cmd_ios(){
+  have xcrun || { err "Xcode command-line tools not found (macOS only)."; return 1; }
+  [ -d "$IOS_PROJ" ] || { err "iOS project not found at $IOS_PROJ."; return 1; }
+  local block line udid bundle dd app
+  block="$(xcrun xctrace list devices 2>/dev/null | sed -n '/== Devices ==/,/== Simulators ==/p')"
+  line="$(printf "%s\n" "$block" | grep -E 'iPhone|iPad' | head -1)"
+  udid="$(printf "%s" "$line" | grep -oE '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}|[0-9A-Fa-f]{25,40}' | tail -1)"
+  if [ -z "$udid" ]; then
+    warn "No physical iPhone/iPad detected."
+    info "Opening the project in Xcode so you can run it there…"; open "$IOS_PROJ" 2>/dev/null
+    return 0
+  fi
+  ok "Found device: $line"
+  bundle="$(grep -m1 PRODUCT_BUNDLE_IDENTIFIER "$IOS_PROJ/project.pbxproj" | sed -E 's/.*= *"?([^";]+)"?;.*/\1/')"
+  dd="$STATE/ios-dd"
+  info "Building (signing must be set up in Xcode once) …"
+  if ! xcodebuild -project "$IOS_PROJ" -scheme "$IOS_SCHEME" -configuration Debug \
+        -destination "id=$udid" -derivedDataPath "$dd" -allowProvisioningUpdates build; then
+    err "xcodebuild failed — open the project in Xcode and run once to set up signing."
+    open "$IOS_PROJ" 2>/dev/null; return 1
+  fi
+  app="$(/usr/bin/find "$dd/Build/Products" -maxdepth 2 -name '*.app' -type d 2>/dev/null | head -1)"
+  [ -n "$app" ] || { err "Built .app not found."; return 1; }
+  info "Installing on device…"
+  xcrun devicectl device install app --device "$udid" "$app" || { err "Install failed."; return 1; }
+  [ -n "$bundle" ] && xcrun devicectl device process launch --device "$udid" "$bundle" >/dev/null 2>&1
+  ok "Installed${bundle:+ & launched ($bundle)} on device."
+}
+
+cmd_status(){
+  printf "${B}Beam dev status${X}\n"
+  is_running web     && ok "web dev server — running (pid $(cat "$(pidfile web)"))  ${D}http://localhost:$WEB_PORT${X}" || info "web dev server — stopped"
+  is_running desktop && ok "desktop app — running (pid $(cat "$(pidfile desktop)"))" || info "desktop app — stopped"
+  local holder; holder="$(lsof -ti :$PORT 2>/dev/null | tr '\n' ' ')"
+  [ -n "$holder" ] && info "port $PORT held by pid(s): $holder" || info "port $PORT free"
+  if have adb; then local n; n="$(adb_serials | grep -c . || true)"; info "adb devices: $n"; adb_serials | sed 's/^/    • /'; fi
+  if have xcrun; then
+    local ios; ios="$(xcrun xctrace list devices 2>/dev/null | sed -n '/== Devices ==/,/== Simulators ==/p' | grep -E 'iPhone|iPad' | sed 's/^/    • /')"
+    [ -n "$ios" ] && { info "iOS devices:"; printf "%s\n" "$ios"; } || info "iOS devices: none"
+  fi
+}
+
+cmd_logs(){ local name="${1:-}"; [ -z "$name" ] && { err "usage: logs <web|desktop>"; return 1; }
+  [ -f "$(logfile "$name")" ] || { err "no log for '$name' yet."; return 1; }
+  info "Tailing .dev/$name.log (Ctrl-C to stop)…"; tail -n 40 -f "$(logfile "$name")"; }
+
+cmd_stop(){ # [web|desktop|all]
+  case "${1:-all}" in
+    web) stop_bg web ;;
+    desktop) stop_bg desktop; free_port; ( cd "$MOBILE" && ./gradlew --stop >/dev/null 2>&1 ) ;;
+    all|*) stop_bg web; stop_bg desktop; free_port; ( cd "$MOBILE" && ./gradlew --stop >/dev/null 2>&1 ); ok "All stopped." ;;
+  esac
+}
+
+print_help(){
+  cat <<EOF
+${B}Beam dev console${X}  ${D}(type a command)${X}
+
+  ${G}setup${X}              Check tools, install web deps, warm Gradle
+  ${G}web${X}                Start the Next.js dev server (background)
+  ${G}desktop${X} [${C}hot${X}]      Free :$PORT, stop daemons, run the desktop host
+                     ${D}(default: run · 'desktop hot' tries hotRun --auto)${X}
+  ${G}android${X}            Build + install + launch the Android remote (adb)
+  ${G}ios${X}                Build + install the iOS remote on a connected iPhone
+  ${G}status${X}             Show what's running, the port, and connected devices
+  ${G}logs${X} <name>        Tail a background log (web | desktop)
+  ${G}stop${X} [web|desktop|all]   Stop background processes (default: all)
+  ${G}help${X}               This help
+  ${G}quit${X} / exit        Leave the console (background apps keep running)
+EOF
+}
+
+dispatch(){
+  local c="${1:-}"; shift || true
+  case "$c" in
+    setup) cmd_setup ;;
+    web) cmd_web ;;
+    web:stop) cmd_stop web ;;
+    desktop|desk) cmd_desktop "${1:-}" ;;
+    hot) cmd_desktop hot ;;
+    android|droid) cmd_android ;;
+    ios|iphone) cmd_ios ;;
+    status|st) cmd_status ;;
+    logs|log) cmd_logs "${1:-}" ;;
+    stop) cmd_stop "${1:-all}" ;;
+    help|h|"?") print_help ;;
+    "") : ;;
+    *) err "Unknown command: $c"; print_help ;;
+  esac
+}
+
+repl(){
+  printf "${B}${BL}◢ Beam dev console${X}  ${D}— $ROOT${X}\n"
+  print_help
+  while true; do
+    printf "\n${B}${BL}beam ▸${X} "
+    if ! read -r line; then printf "\n"; break; fi
+    case "$line" in
+      quit|exit|q)
+        if is_running web || is_running desktop; then
+          printf "Background apps still running. Stop them too? [y/N] "
+          read -r ans; case "$ans" in y|Y) cmd_stop all ;; esac
+        fi
+        break ;;
+      *) dispatch $line ;;
+    esac
+  done
+  info "Bye."
+}
+
+# ---- entry ----------------------------------------------------------------
+if [ "$#" -gt 0 ]; then dispatch "$@"; else repl; fi

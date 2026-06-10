@@ -31,3 +31,6 @@ coverage/
 # IDE
 .idea/
 .vscode/
+
+# Beam dev console state
+.dev/
