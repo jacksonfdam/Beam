@@ -144,7 +144,10 @@ class HostSession(
     /** Switch the projector between slides and the host's live screen. */
     suspend fun setMode(mode: PresentMode) {
         if (_state.value.presentMode == mode) return
-        _state.update { it.copy(presentMode = mode) }
+        // Switching modes wipes any annotation/spotlight so no film lingers.
+        strokes.clear()
+        spotlightToken++
+        _state.update { it.copy(presentMode = mode, strokes = emptyList(), spotlight = null) }
         server.broadcast(ModeChanged(mode))
         updateScreenCapture()
     }
