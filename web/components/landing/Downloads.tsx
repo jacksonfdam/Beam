@@ -1,12 +1,18 @@
+"use client";
+
+import { useI18n } from "@/lib/i18n";
+
 // Download targets. Links are placeholders until release artifacts exist (TODO).
+// `noteKey` indexes the localized note in the i18n bundle.
 const targets = [
-  { os: "macOS", note: "Apple silicon & Intel", href: "#", ready: false },
-  { os: "Windows", note: "Windows 10 & 11", href: "#", ready: false },
-  { os: "Linux", note: "AppImage & .deb", href: "#", ready: false },
-  { os: "iOS / Android", note: "The remote app", href: "#", ready: false },
-];
+  { os: "macOS", noteKey: "macos", href: "#", ready: false },
+  { os: "Windows", noteKey: "windows", href: "#", ready: false },
+  { os: "Linux", noteKey: "linux", href: "#", ready: false },
+  { os: "iOS / Android", noteKey: "mobile", href: "#", ready: false },
+] as const;
 
 export function Downloads() {
+  const { t } = useI18n();
   return (
     <section
       id="download"
@@ -18,30 +24,27 @@ export function Downloads() {
           id="download-heading"
           className="text-3xl font-semibold tracking-tight sm:text-4xl"
         >
-          Download Beam
+          {t.downloads.heading}
         </h2>
-        <p className="mt-4 max-w-2xl text-white/60">
-          The desktop app is the presenter and host. The mobile app is the
-          remote. Builds are on the way.
-        </p>
+        <p className="mt-4 max-w-2xl text-white/60">{t.downloads.sub}</p>
 
         <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {targets.map((t) => (
+          {targets.map((tg) => (
             <a
-              key={t.os}
-              href={t.href}
-              aria-disabled={!t.ready}
+              key={tg.os}
+              href={tg.href}
+              aria-disabled={!tg.ready}
               className="group rounded-2xl border border-ink-line bg-ink p-6 transition hover:border-beam/50"
             >
               <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold text-white">{t.os}</span>
-                {!t.ready && (
+                <span className="text-lg font-semibold text-white">{tg.os}</span>
+                {!tg.ready && (
                   <span className="rounded-full border border-ink-line px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/50">
-                    Soon
+                    {t.downloads.soon}
                   </span>
                 )}
               </div>
-              <p className="mt-2 text-sm text-white/60">{t.note}</p>
+              <p className="mt-2 text-sm text-white/60">{t.downloads.notes[tg.noteKey]}</p>
             </a>
           ))}
         </div>
