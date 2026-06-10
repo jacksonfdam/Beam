@@ -12,6 +12,7 @@ import {
   type HostEndpoint,
   type HostMessage,
   type NavAction,
+  type PresentMode,
   type TimerAction,
 } from "@/lib/protocol";
 
@@ -31,6 +32,11 @@ export interface Presentation {
   hasNotes: boolean;
   timer: TimerView;
   lastError: string | null;
+  presentMode: PresentMode;
+  interacting: boolean;
+  screenAspect: number;
+  slideImage: string | null; // data URL
+  screenImage: string | null; // data URL
 }
 
 const EMPTY: Presentation = {
@@ -42,6 +48,11 @@ const EMPTY: Presentation = {
   hasNotes: false,
   timer: { elapsedMs: 0, running: false, anchorAt: Date.now() },
   lastError: null,
+  presentMode: "SLIDES",
+  interacting: false,
+  screenAspect: 16 / 9,
+  slideImage: null,
+  screenImage: null,
 };
 
 /** Accept a `beam://` link, an `ip:port`, or a bare IP (default port). */
@@ -103,6 +114,16 @@ export function useBeamRemote() {
   const timer = useCallback((action: TimerAction) => {
     remoteRef.current?.send(ClientMsg.timer(action));
   }, []);
+  const setMode = useCallback((mode: PresentMode) => {
+    remoteRef.current?.send(ClientMsg.setMode(mode));
+  }, []);
+  const setInteracting = useCallback((interacting: boolean) => {
+    remoteRef.current?.send(ClientMsg.setInteracting(interacting));
+    setPresentation((prev) => ({ ...prev, interacting }));
+  }, []);
+  const spotlight = useCallback((left: number, top: number, right: number, bottom: number) => {
+    remoteRef.current?.send(ClientMsg.spotlight(left, top, right, bottom));
+  }, []);
 
   const beginStroke = useCallback(
     (x: number, y: number, colorArgb: number, widthDp: number): number => {
@@ -131,6 +152,9 @@ export function useBeamRemote() {
     nav,
     goTo,
     timer,
+    setMode,
+    setInteracting,
+    spotlight,
     beginStroke,
     extendStroke,
     endStroke,
@@ -141,7 +165,7 @@ export function useBeamRemote() {
 function reduce(prev: Presentation, msg: HostMessage): Presentation {
   switch (msg.type) {
     case "hello_ack":
-      return { ...prev, decks: msg.decks, lastError: null };
+      return { ...prev, decks: msg.decks, screenAspect: msg.screenAspect, lastError: null };
     case "hello_reject":
       return { ...prev, lastError: msg.reason };
     case "deck_selected":
@@ -152,6 +176,7 @@ function reduce(prev: Presentation, msg: HostMessage): Presentation {
         hasNotes: msg.hasNotes,
         index: 0,
         notes: null,
+        slideImage: null,
       };
     case "slide_changed":
       return {
@@ -159,7 +184,16 @@ function reduce(prev: Presentation, msg: HostMessage): Presentation {
         index: msg.index,
         total: msg.total,
         notes: msg.notes ?? null,
+        slideImage: null,
       };
+    case "slide_image":
+      return msg.index === prev.index
+        ? { ...prev, slideImage: `data:image/png;base64,${msg.pngBase64}` }
+        : prev;
+    case "screen_image":
+      return { ...prev, screenImage: `data:image/jpeg;base64,${msg.jpegBase64}` };
+    case "mode_changed":
+      return { ...prev, presentMode: msg.mode };
     case "timer_state":
       return {
         ...prev,
