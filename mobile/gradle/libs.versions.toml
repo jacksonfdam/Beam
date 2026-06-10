@@ -18,6 +18,7 @@ ktor = "3.5.0"
 logback = "1.5.34"
 material3 = "1.11.0-alpha07"
 pdfbox = "3.0.3"
+playServicesCodeScanner = "16.1.0"
 qrose = "1.0.1"
 
 [libraries]
@@ -44,6 +45,7 @@ kotlinx-coroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-te
 kotlinx-serializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
+play-services-codeScanner = { module = "com.google.android.gms:play-services-code-scanner", version.ref = "playServicesCodeScanner" }
 qrose = { module = "io.github.alexzhirkevich:qrose", version.ref = "qrose" }
 ktor-serverCore = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
 ktor-serverNetty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }

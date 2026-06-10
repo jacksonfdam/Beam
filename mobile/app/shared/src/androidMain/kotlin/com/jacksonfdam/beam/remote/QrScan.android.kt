@@ -1,17 +1,22 @@
 package com.jacksonfdam.beam.remote
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 
-// TODO: implement with CameraX + ML Kit Barcode. Manual entry is the fallback.
-actual fun isQrScanSupported(): Boolean = false
-
+/**
+ * Uses Google's on-device code scanner (Play Services): a full-screen scanner
+ * UI with no camera permission and no CameraX wiring on our side. The scanner
+ * module is fetched on first use automatically.
+ */
 @Composable
-actual fun QrScannerSurface(modifier: Modifier, onScanned: (String) -> Unit) {
-    Box(modifier, contentAlignment = Alignment.Center) {
-        Text("Enter the host details manually for now.")
+actual fun rememberQrScanLauncher(onResult: (String) -> Unit): (() -> Unit)? {
+    val context = LocalContext.current
+    return {
+        GmsBarcodeScanning.getClient(context).startScan()
+            .addOnSuccessListener { barcode -> barcode.rawValue?.let(onResult) }
+            .addOnCanceledListener { }
+            .addOnFailureListener { }
+        Unit
     }
 }

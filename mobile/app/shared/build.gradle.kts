@@ -39,6 +39,7 @@ kotlin {
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
+            implementation(libs.play.services.codeScanner)
         }
         commonMain.dependencies {
             api(projects.core)
