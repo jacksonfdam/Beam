@@ -50,7 +50,12 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
 
         ModeToggle(presentation.presentMode) { controller.setMode(it) }
 
-        presentation.slideImage?.let { SlidePreview(it) }
+        val slidesMode = presentation.presentMode == PresentMode.SLIDES
+        if (slidesMode) {
+            presentation.slideImage?.let { SlidePreview(it) }
+        } else {
+            ScreenModeNote()
+        }
 
         SlideIndicator(presentation.index, presentation.total)
 
@@ -90,8 +95,9 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
         if (showDrawing) {
             DrawingSurface(
                 controller = controller,
-                slide = presentation.slideImage,
-                slideKey = presentation.index,
+                // In SCREEN mode you annotate over the live screen, not the slide.
+                slide = if (slidesMode) presentation.slideImage else null,
+                slideKey = if (slidesMode) presentation.index else "screen",
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -112,6 +118,20 @@ private fun ModeButton(label: String, selected: Boolean, modifier: Modifier, onC
         Button(onClick = onClick, modifier = modifier) { Text(label) }
     } else {
         OutlinedButton(onClick = onClick, modifier = modifier) { Text(label) }
+    }
+}
+
+@Composable
+private fun ScreenModeNote() {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text("Projecting your screen", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Your live desktop is shown — slides advance underneath. Tap Slides to project the deck again, or draw to annotate over your screen.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
