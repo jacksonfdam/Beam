@@ -14,6 +14,7 @@ import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.plugins.origin
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.DefaultWebSocketServerSession
 import io.ktor.server.websocket.WebSockets
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.Collections
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Ktor CIO-backed [PresenterServer] — the desktop host's LAN socket.
@@ -53,6 +55,14 @@ class KtorPresenterServer(
     private var server: EmbeddedServer<*, *>? = null
     private var pin: String? = null
 
+    // Brute-force defence: a 4-digit PIN is only ~10k combinations, so an
+    // external agent on the LAN could otherwise grind it. We track failed PIN
+    // attempts per remote host and lock that host out for a cooldown once it
+    // trips the threshold. Successful auth clears the counter.
+    private val failures = ConcurrentHashMap<String, Failures>()
+
+    private data class Failures(val count: Int, val blockedUntil: Long)
+
     override suspend fun start(port: Int, pin: String?): HostEndpoint {
         this.pin = pin
         val engine = embeddedServer(CIO, port = port) {
@@ -71,6 +81,16 @@ class KtorPresenterServer(
     }
 
     private suspend fun DefaultWebSocketServerSession.handleClient() {
+        val remoteHost = runCatching { call.request.origin.remoteHost }.getOrDefault("unknown")
+
+        // Refuse a host that has tripped the brute-force lockout, before reading
+        // anything: it cannot keep guessing the PIN during the cooldown.
+        if (isLockedOut(remoteHost)) {
+            send(Frame.Text(HelloReject("too many attempts; try again later").toJson()))
+            close()
+            return
+        }
+
         // Never trust a bare open port: the first frame must be a valid Hello.
         val firstText = (incoming.receiveCatching().getOrNull() as? Frame.Text)?.readText()
         val hello = firstText?.let { runCatching { decodeClientMessage(it) }.getOrNull() } as? Hello
@@ -85,11 +105,13 @@ class KtorPresenterServer(
             return
         }
         val required = pin
-        if (!required.isNullOrEmpty() && hello.pin != required) {
+        if (!required.isNullOrEmpty() && !constantTimeEquals(hello.pin, required)) {
+            registerFailure(remoteHost)
             send(Frame.Text(HelloReject("bad pin").toJson()))
             close()
             return
         }
+        clearFailures(remoteHost)
 
         send(Frame.Text(helloAck().toJson()))
         sessions.add(this)
@@ -119,5 +141,42 @@ class KtorPresenterServer(
         _clientCount.value = 0
         server?.stop(gracePeriodMillis = 0, timeoutMillis = 500)
         server = null
+    }
+
+    // --- brute-force lockout -------------------------------------------------
+
+    private fun isLockedOut(host: String): Boolean {
+        val f = failures[host] ?: return false
+        return f.blockedUntil > System.currentTimeMillis()
+    }
+
+    private fun registerFailure(host: String) {
+        val now = System.currentTimeMillis()
+        failures.compute(host) { _, prev ->
+            val count = (prev?.count ?: 0) + 1
+            if (count >= MAX_PIN_ATTEMPTS) Failures(0, now + LOCKOUT_MS) else Failures(count, 0L)
+        }
+    }
+
+    private fun clearFailures(host: String) {
+        failures.remove(host)
+    }
+
+    /**
+     * Length-independent (the PIN length is not secret) but value-comparison is
+     * constant-time, so a network attacker can't learn the PIN digit-by-digit
+     * from response timing.
+     */
+    private fun constantTimeEquals(provided: String?, expected: String): Boolean {
+        val a = provided ?: ""
+        if (a.length != expected.length) return false
+        var diff = 0
+        for (i in expected.indices) diff = diff or (a[i].code xor expected[i].code)
+        return diff == 0
+    }
+
+    private companion object {
+        const val MAX_PIN_ATTEMPTS = 5
+        const val LOCKOUT_MS = 30_000L
     }
 }

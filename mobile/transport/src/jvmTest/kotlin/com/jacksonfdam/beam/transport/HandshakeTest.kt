@@ -53,6 +53,34 @@ class HandshakeTest {
     }
 
     @Test
+    fun locksOutAfterRepeatedBadPins() = runBlocking {
+        val bound = server.start(port = 0, pin = "4821")
+        val raw = HttpClient(CIO) { install(WebSockets) }
+
+        suspend fun attempt(pin: String): HostMessage? {
+            var reply: HostMessage? = null
+            raw.webSocket(host = "127.0.0.1", port = bound.port, path = CUE_PATH) {
+                send(Frame.Text(Hello("Phone", protocolVersion = PROTOCOL_VERSION, pin = pin).toJson()))
+                reply = decodeHostMessage((incoming.receive() as Frame.Text).readText())
+            }
+            return reply
+        }
+
+        // Five wrong PINs from the same host trip the lockout.
+        repeat(5) {
+            val r = attempt("0000")
+            assertTrue(r is HelloReject, "expected HelloReject on bad pin, was $r")
+        }
+        // While locked out, even the CORRECT PIN is refused.
+        val locked = attempt("4821")
+        raw.close()
+        assertTrue(
+            locked is HelloReject && locked.reason.contains("too many", ignoreCase = true),
+            "expected lockout reject, was $locked",
+        )
+    }
+
+    @Test
     fun rejectsVersionMismatch() = runBlocking {
         val bound = server.start(port = 0, pin = null)
         // A raw client lets us forge an incompatible protocol version.

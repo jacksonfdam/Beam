@@ -40,6 +40,11 @@ import kotlinx.coroutines.launch
 const val HOST_VERSION = "1.0.0"
 private const val SCREEN_CAPTURE_INTERVAL_MS = 1500L
 
+// Bounds so a misbehaving or hostile (but authenticated) remote cannot exhaust
+// host memory by flooding ink. Generous for real annotation; hard ceilings.
+private const val MAX_STROKES = 2_000
+private const val MAX_POINTS_PER_STROKE = 10_000
+
 /**
  * The host's single source of truth. It binds the [PresenterServer], reacts to
  * remote [ClientMessage]s, mutates slide / timer / notes / ink, and broadcasts
@@ -97,15 +102,20 @@ class HostSession(
             is GoTo -> goTo(msg.index)
             is TimerCmd -> timer(msg.action)
             is StrokeStart -> {
-                strokes[msg.strokeId] =
-                    InkStroke(msg.strokeId, msg.colorArgb, msg.widthDp, listOf(msg.point))
-                publishStrokes()
+                // Ignore new strokes past the ceiling (existing ones still extend).
+                if (strokes.size < MAX_STROKES && !strokes.containsKey(msg.strokeId)) {
+                    strokes[msg.strokeId] =
+                        InkStroke(msg.strokeId, msg.colorArgb, msg.widthDp, listOf(msg.point))
+                    publishStrokes()
+                }
             }
 
             is StrokePoint -> {
                 strokes[msg.strokeId]?.let { s ->
-                    strokes[msg.strokeId] = s.copy(points = s.points + msg.point)
-                    publishStrokes()
+                    if (s.points.size < MAX_POINTS_PER_STROKE) {
+                        strokes[msg.strokeId] = s.copy(points = s.points + msg.point)
+                        publishStrokes()
+                    }
                 }
             }
 
