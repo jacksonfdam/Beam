@@ -2,7 +2,9 @@ package com.jacksonfdam.beam.remote.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,8 +29,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -92,7 +97,12 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
         NotesCard(presentation.notes, presentation.hasNotes)
         TimerCard(presentation.timer.elapsedMs, presentation.timer.running, controller)
 
-        TextButton(onClick = { showDrawing = !showDrawing }) {
+        TextButton(
+            onClick = {
+                if (showDrawing) controller.clearInk() // hiding also clears the projected ink
+                showDrawing = !showDrawing
+            },
+        ) {
             Text(if (showDrawing) "Hide drawing" else if (slidesMode) "Draw on the slide" else "Draw / spotlight")
         }
         if (showDrawing) {
@@ -121,10 +131,14 @@ private fun ModeToggle(mode: PresentMode, onSetMode: (PresentMode) -> Unit) {
 
 @Composable
 private fun ModeButton(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val padding = PaddingValues(horizontal = 8.dp, vertical = 10.dp)
+    val text = @Composable {
+        Text(label, maxLines = 1, softWrap = false, style = MaterialTheme.typography.labelLarge)
+    }
     if (selected) {
-        Button(onClick = onClick, modifier = modifier) { Text(label) }
+        Button(onClick = onClick, modifier = modifier, contentPadding = padding) { text() }
     } else {
-        OutlinedButton(onClick = onClick, modifier = modifier) { Text(label) }
+        OutlinedButton(onClick = onClick, modifier = modifier, contentPadding = padding) { text() }
     }
 }
 
@@ -163,19 +177,34 @@ private fun ScreenModeNote() {
 
 @Composable
 private fun SlidePreview(image: ImageBitmap) {
+    var scale by remember { mutableStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
     Card(Modifier.fillMaxWidth()) {
         Box(
             Modifier
                 .fillMaxWidth()
                 .aspectRatio(image.width.toFloat() / image.height.toFloat())
                 .clip(RoundedCornerShape(6.dp))
-                .background(Color.Black),
+                .background(Color.Black)
+                .pointerInput(Unit) {
+                    detectTransformGestures { _, pan, zoom, _ ->
+                        scale = (scale * zoom).coerceIn(1f, 5f)
+                        offset = if (scale <= 1f) Offset.Zero else offset + pan
+                    }
+                },
             contentAlignment = Alignment.Center,
         ) {
             Image(
                 bitmap = image,
-                contentDescription = "Current slide",
-                modifier = Modifier.fillMaxWidth(),
+                contentDescription = "Slide preview — pinch to zoom",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                        translationX = offset.x
+                        translationY = offset.y
+                    },
                 contentScale = ContentScale.Fit,
             )
         }
