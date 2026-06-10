@@ -71,6 +71,12 @@ class HostSession(
         _state.update { it.copy(decks = decks.values.map { d -> d.info }) }
     }
 
+    /** Host-side convenience: register a freshly opened deck and project it immediately. */
+    suspend fun openDeck(deck: HostDeck) {
+        addDeck(deck)
+        selectDeck(deck.info.id)
+    }
+
     private suspend fun handle(msg: ClientMessage) {
         when (msg) {
             is Hello -> replayState()
