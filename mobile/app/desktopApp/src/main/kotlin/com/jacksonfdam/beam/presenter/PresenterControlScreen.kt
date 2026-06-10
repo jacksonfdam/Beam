@@ -36,6 +36,7 @@ import com.jacksonfdam.beam.protocol.PresentMode
 fun PresenterControlScreen(
     state: HostState,
     deck: HostDeck?,
+    startError: String? = null,
     onOpenDeck: () -> Unit,
     onSetMode: (PresentMode) -> Unit = {},
 ) {
@@ -76,12 +77,11 @@ fun PresenterControlScreen(
                 modifier = Modifier.width(280.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                state.endpoint?.let {
-                    ConnectionCard(
-                        it,
-                        state.pin,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                val endpoint = state.endpoint
+                if (endpoint != null) {
+                    ConnectionCard(endpoint, state.pin, modifier = Modifier.fillMaxWidth())
+                } else {
+                    ServerStatusCard(startError)
                 }
                 TimerCard(state.timerElapsedMs, state.timerRunning)
                 NotesCard(state.currentNotes, deck != null)
@@ -184,6 +184,26 @@ private fun NextSlide(state: HostState, deck: HostDeck?) {
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ServerStatusCard(error: String?) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Connection", style = MaterialTheme.typography.titleMedium)
+            if (error == null) {
+                Text("Starting the server…", color = Color.Gray)
+            } else {
+                Text("Couldn't start the server.", color = MaterialTheme.colorScheme.error)
+                Text(error, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                Text(
+                    "Port ${com.jacksonfdam.beam.protocol.DEFAULT_PORT} may be held by another Beam window — quit it and relaunch.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                )
             }
         }
     }

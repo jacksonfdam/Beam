@@ -6,7 +6,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -56,7 +58,11 @@ fun main() = application {
         s
     }
 
-    LaunchedEffect(Unit) { runCatching { session.start(pin = pin, port = DEFAULT_PORT) } }
+    var startError by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        runCatching { session.start(pin = pin, port = DEFAULT_PORT) }
+            .onFailure { startError = it.message ?: it.toString() }
+    }
     DisposableEffect(Unit) { onDispose { appScope.cancel() } }
 
     val state by session.state.collectAsState()
@@ -67,6 +73,7 @@ fun main() = application {
             PresenterControlScreen(
                 state = state,
                 deck = deck,
+                startError = startError,
                 onOpenDeck = {
                     pickPdf(window)?.let { file ->
                         appScope.launch {
