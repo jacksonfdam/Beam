@@ -1,13 +1,21 @@
+import { SiteHeader } from "@/components/landing/SiteHeader";
+import { Hero } from "@/components/landing/Hero";
+import { Features } from "@/components/landing/Features";
+import { HowToConnect } from "@/components/landing/HowToConnect";
+import { Downloads } from "@/components/landing/Downloads";
+import { SiteFooter } from "@/components/landing/SiteFooter";
+
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-content flex-col items-center justify-center px-6 text-center">
-      <h1 className="text-4xl font-semibold tracking-tight">Beam</h1>
-      <p className="mt-3 text-lg text-white/70">
-        Open → Present → Done.
-      </p>
-      <p className="mt-6 max-w-md text-sm text-white/50">
-        Landing page coming up next.
-      </p>
-    </main>
+    <>
+      <SiteHeader />
+      <main id="main">
+        <Hero />
+        <Features />
+        <HowToConnect />
+        <Downloads />
+      </main>
+      <SiteFooter />
+    </>
   );
 }
