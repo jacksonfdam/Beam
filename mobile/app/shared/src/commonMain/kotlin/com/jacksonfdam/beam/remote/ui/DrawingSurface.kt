@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.jacksonfdam.beam.protocol.NormPoint
 import com.jacksonfdam.beam.remote.RemoteController
-import kotlin.math.roundToInt
 
 /**
  * A pointer surface that emits NORMALIZED (0..1) coordinates relative to its own
@@ -99,7 +98,7 @@ fun DrawingSurface(
                     srcOffset = IntOffset.Zero,
                     srcSize = IntSize(slide.width, slide.height),
                     dstOffset = IntOffset.Zero,
-                    dstSize = IntSize(size.width.roundToInt(), size.height.roundToInt()),
+                    dstSize = IntSize(size.width, size.height),
                 )
             } else {
                 drawRect(Color(0xFF13161D))
