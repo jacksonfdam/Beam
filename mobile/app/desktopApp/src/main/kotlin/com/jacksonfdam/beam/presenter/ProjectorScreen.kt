@@ -29,19 +29,24 @@ import kotlin.math.roundToInt
 @Composable
 fun ProjectorScreen(
     slide: ImageBitmap?,
-    slideAspect: Float,
     strokes: List<InkStroke>,
 ) {
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         if (slide == null) {
-            Text("Waiting for a deck…", color = Color.White.copy(alpha = 0.7f), modifier = Modifier.align(Alignment.Center))
+            Text(
+                "Waiting for a deck…",
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.align(Alignment.Center)
+            )
             return@Box
         }
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val cw = constraints.maxWidth.toFloat()
             val ch = constraints.maxHeight.toFloat()
 
-            // Fit the slide inside the display, preserving aspect ratio.
+            // Fit using the rendered image's own aspect (matches the pixels drawn,
+            // regardless of any page rotation/cropbox quirk).
+            val slideAspect = slide.width.toFloat() / slide.height.toFloat()
             var dw = cw
             var dh = cw / slideAspect
             if (dh > ch) {

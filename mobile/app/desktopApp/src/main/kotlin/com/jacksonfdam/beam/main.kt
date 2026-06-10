@@ -94,10 +94,7 @@ fun main() = application {
             val slide = remember(state.currentDeckId, state.slideIndex) {
                 deck?.let { runCatching { SlideImages.render(it.document, state.slideIndex, 1920) }.getOrNull() }
             }
-            val aspect = remember(state.currentDeckId, state.slideIndex) {
-                deck?.let { runCatching { it.document.pageAspectRatio(state.slideIndex) }.getOrNull() } ?: (16f / 9f)
-            }
-            ProjectorScreen(slide = slide, slideAspect = aspect, strokes = state.strokes)
+            ProjectorScreen(slide = slide, strokes = state.strokes)
         }
     }
 }
