@@ -6,9 +6,6 @@ import { PairingForm } from "@/components/remote/PairingForm";
 import { RemoteControls } from "@/components/remote/RemoteControls";
 import { BeamMark } from "@/components/landing/BeamMark";
 
-const INK_COLOR_ARGB = 0xffef4444;
-const INK_WIDTH_DP = 4;
-
 export default function RemotePage() {
   const r = useBeamRemote();
   const connected = r.state.phase === "connected";
@@ -30,7 +27,10 @@ export default function RemotePage() {
             onNav={r.nav}
             onGoTo={r.goTo}
             onTimer={r.timer}
-            onBeginStroke={(x, y) => r.beginStroke(x, y, INK_COLOR_ARGB, INK_WIDTH_DP)}
+            onSetMode={r.setMode}
+            onSetInteracting={r.setInteracting}
+            onSpotlight={r.spotlight}
+            onBeginStroke={r.beginStroke}
             onExtendStroke={r.extendStroke}
             onEndStroke={r.endStroke}
             onClearInk={r.clearInk}

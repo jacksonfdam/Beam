@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { NavAction, TimerAction } from "@/lib/protocol";
+import type { NavAction, PresentMode, TimerAction } from "@/lib/protocol";
 import type { Presentation } from "./useBeamRemote";
-import { DrawingSurface } from "./DrawingSurface";
+import { DrawingSurface, type DrawTool } from "./DrawingSurface";
 import { useWallClock } from "./clock";
 
 interface Props {
@@ -13,14 +13,15 @@ interface Props {
   onNav: (action: NavAction) => void;
   onGoTo: (index: number) => void;
   onTimer: (action: TimerAction) => void;
-  onBeginStroke: (x: number, y: number) => number;
+  onSetMode: (mode: PresentMode) => void;
+  onSetInteracting: (interacting: boolean) => void;
+  onSpotlight: (left: number, top: number, right: number, bottom: number) => void;
+  onBeginStroke: (x: number, y: number, colorArgb: number, widthDp: number) => number;
   onExtendStroke: (id: number, x: number, y: number) => void;
   onEndStroke: (id: number) => void;
   onClearInk: () => void;
   onDisconnect: () => void;
 }
-
-const INK_PREVIEW_CSS = "#ef4444";
 
 export function RemoteControls(props: Props) {
   const { presentation: p } = props;
@@ -83,6 +84,10 @@ function DeckPicker({
 function ConnectedDeck(props: Props) {
   const { presentation: p } = props;
   const [showDrawing, setShowDrawing] = useState(false);
+  const [tool, setTool] = useState<DrawTool>("PEN");
+  const slidesMode = p.presentMode === "SLIDES";
+  const previewImage = slidesMode ? p.slideImage : p.screenImage;
+  const effectiveTool: DrawTool = slidesMode && tool === "SPOTLIGHT" ? "PEN" : tool;
 
   // Arrow keys drive navigation for laptop remotes.
   useEffect(() => {
@@ -101,6 +106,30 @@ function ConnectedDeck(props: Props) {
   return (
     <section className="mx-auto w-full max-w-md space-y-6">
       <ConnectedHeader sessionName={props.sessionName} onDisconnect={props.onDisconnect} />
+
+      <Segmented
+        options={[
+          { label: "Slides", selected: slidesMode, onClick: () => props.onSetMode("SLIDES") },
+          { label: "Screen", selected: !slidesMode, onClick: () => props.onSetMode("SCREEN") },
+        ]}
+      />
+
+      {!slidesMode && (
+        <Segmented
+          options={[
+            { label: "Annotate", selected: !p.interacting, onClick: () => props.onSetInteracting(false) },
+            { label: "Interact", selected: p.interacting, onClick: () => props.onSetInteracting(true) },
+          ]}
+        />
+      )}
+
+      {previewImage && !showDrawing && (
+        <img
+          src={previewImage}
+          alt={slidesMode ? "Current slide" : "Live screen"}
+          className="w-full rounded-2xl border border-ink-line bg-black"
+        />
+      )}
 
       <SlideIndicator index={p.index} total={p.total} />
 
@@ -127,28 +156,68 @@ function ConnectedDeck(props: Props) {
 
       <TimerPanel timer={p.timer} onTimer={props.onTimer} />
 
-      <div>
+      <div className="space-y-3">
         <button
           type="button"
-          onClick={() => setShowDrawing((v) => !v)}
+          onClick={() => {
+            if (showDrawing) props.onClearInk();
+            setShowDrawing((v) => !v);
+          }}
           aria-expanded={showDrawing}
           className="text-sm font-medium text-beam-glow underline underline-offset-4 hover:text-beam-bright"
         >
-          {showDrawing ? "Hide drawing" : "Draw on the slide"}
+          {showDrawing ? "Hide drawing" : slidesMode ? "Draw on the slide" : "Draw / spotlight"}
         </button>
         {showDrawing && (
-          <div className="mt-3">
+          <>
+            <Segmented
+              options={[
+                { label: "Pen", selected: effectiveTool === "PEN", onClick: () => setTool("PEN") },
+                { label: "Marker", selected: effectiveTool === "MARKER", onClick: () => setTool("MARKER") },
+                ...(slidesMode
+                  ? []
+                  : [{ label: "Spotlight", selected: effectiveTool === "SPOTLIGHT", onClick: () => setTool("SPOTLIGHT") }]),
+              ]}
+            />
             <DrawingSurface
-              previewColor={INK_PREVIEW_CSS}
-              onBegin={(x, y) => props.onBeginStroke(x, y)}
+              image={previewImage}
+              aspect={p.screenAspect}
+              tool={effectiveTool}
+              onBegin={props.onBeginStroke}
               onExtend={props.onExtendStroke}
               onEnd={props.onEndStroke}
               onClear={props.onClearInk}
+              onSpotlight={props.onSpotlight}
             />
-          </div>
+          </>
         )}
       </div>
     </section>
+  );
+}
+
+function Segmented({
+  options,
+}: {
+  options: { label: string; selected: boolean; onClick: () => void }[];
+}) {
+  return (
+    <div className="flex gap-2">
+      {options.map((o) => (
+        <button
+          key={o.label}
+          type="button"
+          onClick={o.onClick}
+          className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition ${
+            o.selected
+              ? "bg-beam text-ink"
+              : "border border-ink-line text-white/80 hover:border-beam/60"
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
   );
 }
 
