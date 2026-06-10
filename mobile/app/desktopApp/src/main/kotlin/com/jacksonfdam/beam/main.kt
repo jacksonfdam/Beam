@@ -7,6 +7,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
@@ -102,9 +103,11 @@ fun main() = application {
     // Transparent annotation overlay for SCREEN mode: paints the ink over the
     // live desktop (a demo being screen-shared). Shown only while strokes exist,
     // so an empty overlay never blocks interaction with the demo.
+    // Transparent windows must be undecorated and NOT maximized/fullscreen, so
+    // we size it explicitly to the target screen (floating placement).
     val overlayState = rememberWindowState(
-        placement = WindowPlacement.Maximized,
         position = projectorPosition(),
+        size = projectorSize(),
     )
     Window(
         onCloseRequest = {},
@@ -112,6 +115,7 @@ fun main() = application {
         title = "Beam — Annotations",
         undecorated = true,
         transparent = true,
+        resizable = false,
         alwaysOnTop = true,
         visible = state.presentMode == PresentMode.SCREEN && state.strokes.isNotEmpty(),
     ) {
@@ -131,9 +135,18 @@ private fun pickPdf(parent: java.awt.Window?): File? {
     return File(dir, file)
 }
 
-private fun projectorPosition(): WindowPosition {
+private fun targetScreenBounds(): java.awt.Rectangle {
     val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
     val target = if (screens.size > 1) screens.last() else screens.first()
-    val bounds = target.defaultConfiguration.bounds
+    return target.defaultConfiguration.bounds
+}
+
+private fun projectorPosition(): WindowPosition {
+    val bounds = targetScreenBounds()
     return WindowPosition(bounds.x.dp, bounds.y.dp)
+}
+
+private fun projectorSize(): DpSize {
+    val bounds = targetScreenBounds()
+    return DpSize(bounds.width.dp, bounds.height.dp)
 }
