@@ -46,6 +46,7 @@ const val INK_WIDTH_DP = 4f
 class RemoteController(
     private val scope: CoroutineScope,
     private val client: PresenterClient,
+    private val store: ConnectionStore = NoopConnectionStore,
 ) {
     val connection: StateFlow<ConnectionState> = client.state
 
@@ -58,7 +59,11 @@ class RemoteController(
         scope.launch { client.incoming.collect { reduce(it) } }
     }
 
+    /** The last host paired with, if any — used to pre-fill and auto-reconnect. */
+    fun lastSaved(): SavedEndpoint? = store.load()
+
     fun connect(endpoint: HostEndpoint, clientName: String) {
+        store.save(SavedEndpoint(endpoint.host, endpoint.port, endpoint.pin, clientName))
         _presentation.value = Presentation()
         scope.launch { client.connect(endpoint, clientName) }
     }
