@@ -223,3 +223,13 @@ On the native flow everything stays on your LAN, peer-to-peer between your devic
 
 The browser remote uses a server only to exchange the initial WebRTC handshake (a session
 code and connection details) with a short TTL — never slide content.
+
+## Credits
+
+Built by **Jackson Mafra** ([jacksonfdam](https://github.com/jacksonfdam)).
+
+Beam began as a tool for the author's own talk at [mdevcamp.eu](https://mdevcamp.eu/):
+the talk meant switching between slides and four live demos while keeping an eye
+on the speaker notes and the clock. A scrappy first version got through the day;
+it then grew into this — proudly built with Compose Multiplatform — and felt
+worth sharing with other speakers.
