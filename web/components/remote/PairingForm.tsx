@@ -44,7 +44,6 @@ export function PairingForm({ state, onConnect, onCancel }: Props) {
             inputMode="text"
             autoComplete="off"
             autoCapitalize="characters"
-            // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}

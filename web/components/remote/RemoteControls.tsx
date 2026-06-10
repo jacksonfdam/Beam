@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { NavAction, TimerAction } from "@/lib/protocol";
 import type { Presentation } from "./useBeamRemote";
 import { DrawingSurface } from "./DrawingSurface";
+import { useWallClock } from "./clock";
 
 interface Props {
   presentation: Presentation;
@@ -250,15 +251,11 @@ function TimerPanel({
   timer: Presentation["timer"];
   onTimer: (action: TimerAction) => void;
 }) {
-  const [, force] = useState(0);
-  useEffect(() => {
-    if (!timer.running) return;
-    const id = setInterval(() => force((n) => n + 1), 250);
-    return () => clearInterval(id);
-  }, [timer.running, timer.anchorAt]);
-
+  // Read a shared ticking clock so the display advances between host updates
+  // without calling Date.now() during render.
+  const now = useWallClock();
   const elapsed = timer.running
-    ? timer.elapsedMs + (Date.now() - timer.anchorAt)
+    ? timer.elapsedMs + Math.max(0, now - timer.anchorAt)
     : timer.elapsedMs;
 
   return (
