@@ -23,4 +23,6 @@ data class Presentation(
     /** A preview of the current slide, pushed by the host; null until it arrives. */
     val slideImage: ImageBitmap? = null,
     val presentMode: PresentMode = PresentMode.SLIDES,
+    val interacting: Boolean = false,
+    val screenAspect: Float = 16f / 9f,
 )

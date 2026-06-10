@@ -18,7 +18,9 @@ import com.jacksonfdam.beam.protocol.NormPoint
 import com.jacksonfdam.beam.protocol.Pong
 import com.jacksonfdam.beam.protocol.PresenterClient
 import com.jacksonfdam.beam.protocol.SelectDeck
+import com.jacksonfdam.beam.protocol.SetInteracting
 import com.jacksonfdam.beam.protocol.SetMode
+import com.jacksonfdam.beam.protocol.Spotlight
 import com.jacksonfdam.beam.protocol.SlideChanged
 import com.jacksonfdam.beam.protocol.SlideImage
 import com.jacksonfdam.beam.protocol.StrokeEnd
@@ -37,6 +39,8 @@ import kotlin.io.encoding.Base64
 
 const val INK_COLOR_ARGB = 0xFFEF4444L
 const val INK_WIDTH_DP = 4f
+const val HIGHLIGHT_COLOR_ARGB = 0x55FFEB3BL // translucent yellow marker
+const val HIGHLIGHT_WIDTH_DP = 18f
 
 /**
  * Drives the remote: wraps a [PresenterClient], turns the host's pushes into a
@@ -79,9 +83,18 @@ class RemoteController(
     fun setMode(mode: PresentMode) = send(SetMode(mode))
     fun clearInk() = send(ClearInk)
 
-    fun beginStroke(point: NormPoint): Long {
+    /** Toggle the host's annotation overlay (interacting = overlay hidden, demo usable). */
+    fun setInteracting(interacting: Boolean) {
+        _presentation.update { it.copy(interacting = interacting) }
+        send(SetInteracting(interacting))
+    }
+
+    fun spotlight(left: Float, top: Float, right: Float, bottom: Float) =
+        send(Spotlight(left, top, right, bottom))
+
+    fun beginStroke(point: NormPoint, colorArgb: Long = INK_COLOR_ARGB, widthDp: Float = INK_WIDTH_DP): Long {
         val id = ++strokeCounter
-        send(StrokeStart(id, INK_COLOR_ARGB, INK_WIDTH_DP, point))
+        send(StrokeStart(id, colorArgb, widthDp, point))
         return id
     }
 
@@ -101,7 +114,7 @@ class RemoteController(
         }
         _presentation.update { p ->
             when (msg) {
-                is HelloAck -> p.copy(decks = msg.decks, lastError = null)
+                is HelloAck -> p.copy(decks = msg.decks, screenAspect = msg.screenAspect, lastError = null)
                 is HelloReject -> p.copy(lastError = msg.reason)
                 is DeckSelected -> p.copy(
                     selectedDeckId = msg.deckId,
