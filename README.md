@@ -4,7 +4,7 @@ Turn any exported PDF (Keynote, PowerPoint, Canva, Figma) into a flawless
 fullscreen presentation, controlled from your phone. No broken fonts, no layout
 surprises — the PDF renders exactly as designed. **Open → Present → Done.**
 
-The product stance is **local-first, LocalSend-style**: no accounts, no cloud
+The product stance is **local-first**: no accounts, no cloud
 storage of user content, no telemetry. Devices discover and talk to each other
 directly over the LAN. The only thing that may ever touch a server is the
 WebRTC signaling handshake for the optional browser remote — never slide
@@ -13,7 +13,7 @@ content, notes, or ink.
 ## Repository layout
 
 ```
-files/    The canonical build prompts and BeamProtocol.kt (the wire-protocol spec)
+files/    BeamProtocol.kt — the wire-protocol spec copy (canonical lives in :core)
 mobile/   Kotlin Multiplatform apps — desktop presenter/host + Android/iOS remote
 web/      Next.js — browser remote + WebRTC signaling (+ the in-app landing)
 landing/  Standalone static marketing site for Vercel (multilingual, demo videos)
@@ -55,6 +55,22 @@ Transport, PDF rendering, and UI depend on the abstractions in `:core`
 Two things work end to end today: the **web landing page**, and the **desktop
 host ↔ native Android/iOS remote over Wi‑Fi**. The browser remote has a caveat
 (see the end).
+
+## Dev console (`beam`)
+
+The quickest way in is `./beam`, an interactive console that sets things up and
+runs each surface:
+
+```bash
+./beam            # interactive — type `help`
+./beam web        # or run a single command and exit
+```
+
+It offers `setup` (tools + web deps + Gradle warmup), `web` (Next.js dev
+server), `desktop` (frees `:53317`, stops stale daemons, runs the host),
+`android` / `ios` (build + install on a connected device), plus `status`,
+`logs`, and `stop`. Background processes keep their PIDs and logs under `.dev/`.
+The manual commands below are what each console action runs under the hood.
 
 ## Prerequisites
 
@@ -139,16 +155,16 @@ npm test                         # TS protocol mirror + signaling validation/sto
 
 The landing page, the `/remote` UI, and the signaling functions are built and
 testable, **but browser↔desktop pairing does not complete yet**: the desktop
-still needs a WebRTC peer that answers the signaling handshake (section 7 of the
-web build prompt). Today the desktop speaks only the LAN WebSocket the **native**
-remote uses. So: landing ✅, signaling endpoints ✅, full in-browser pairing ❌
-until that desktop WebRTC peer exists.
+still needs a WebRTC peer that answers the signaling handshake. Today the desktop
+speaks only the LAN WebSocket the **native** remote uses. So: landing ✅,
+signaling endpoints ✅, full in-browser pairing ❌ until that desktop WebRTC peer
+exists.
 
 ## Internationalization (EN, PT-BR, ES, SV)
 
-The UI ships in English, Brazilian Portuguese, Spanish, and Swedish (`sv` — the
-language; `se` is Sweden's country code). Each surface has its own mechanism, and
-all expose a language switcher that persists the choice:
+The UI ships in English, Brazilian Portuguese, Spanish, and Swedish. Each surface
+has its own mechanism, and all expose a language switcher that persists the
+choice:
 
 - **Native app (`:app:shared`)** — strings live in
   `com/jacksonfdam/beam/i18n/Strings.kt` (`BeamStrings` data class + one bundle per
@@ -189,18 +205,18 @@ separate from the in-app landing served by the Next.js `web/` project.
 
 ---
 
-## Build status
+## Status
 
-- [x] Web: landing page, signaling functions, `lib/protocol.ts`, `/remote` UI (verified with build/lint/tests).
-- [x] Mobile M2 — `:core` wire protocol + tests.
-- [x] Mobile M3 — `:transport` Ktor client/server + handshake + tests.
-- [x] Mobile M4 — `:pdf` rendering (Desktop/Android/iOS) + notes sidecar.
-- [x] Mobile M5 — desktop presenter (load PDF, fullscreen projector, QR/IP/PIN, presenter view, ink).
-- [x] Mobile M6–8 — mobile remote (connect, deck picker, navigation, notes, timer, drawing).
-- [x] Internationalization — EN / PT-BR / ES / SV across the native app and the web (with switchers).
-- [x] Standalone multilingual landing site (`landing/`) with demo-video slots.
-- [ ] Web browser remote ↔ desktop (needs a WebRTC peer on the desktop host).
-- [ ] Polish: QR camera scanning on mobile, error/empty states, accessibility pass.
+The two primary paths work end to end: the **web landing page**, and the
+**desktop host ↔ native Android/iOS remote** over Wi‑Fi — navigation, the
+host-owned timer, live ink, speaker notes, reconnect-restores-state, and
+wrong-PIN rejection. The UI is localized (EN / PT-BR / ES / SV) with an in-app
+switcher, the Beam icon is wired across web, mobile, and favicons, and the
+standalone landing site is ready to deploy.
+
+Still open: browser↔desktop pairing needs a WebRTC peer on the desktop host
+(see the caveat above); plus polish — QR camera scanning on mobile, richer
+error/empty states, and an accessibility pass.
 
 ## Privacy
 
