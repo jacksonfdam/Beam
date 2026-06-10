@@ -15,7 +15,8 @@ content, notes, or ink.
 ```
 files/    The canonical build prompts and BeamProtocol.kt (the wire-protocol spec)
 mobile/   Kotlin Multiplatform apps — desktop presenter/host + Android/iOS remote
-web/      Next.js — public landing page + browser remote + WebRTC signaling
+web/      Next.js — browser remote + WebRTC signaling (+ the in-app landing)
+landing/  Standalone static marketing site for Vercel (multilingual, demo videos)
 ```
 
 Each subfolder has its own README with details; this file is the project
@@ -143,6 +144,42 @@ web build prompt). Today the desktop speaks only the LAN WebSocket the **native*
 remote uses. So: landing ✅, signaling endpoints ✅, full in-browser pairing ❌
 until that desktop WebRTC peer exists.
 
+## Internationalization (EN, PT-BR, ES, SV)
+
+The UI ships in English, Brazilian Portuguese, Spanish, and Swedish (`sv` — the
+language; `se` is Sweden's country code). Each surface has its own mechanism, and
+all expose a language switcher that persists the choice:
+
+- **Native app (`:app:shared`)** — strings live in
+  `com/jacksonfdam/beam/i18n/Strings.kt` (`BeamStrings` data class + one bundle per
+  `Language`). `LocalStrings` is a Compose `CompositionLocal` provided by
+  `ProvideStrings { … }` at each window root; read `LocalStrings.current.<key>` in
+  composables. `LanguageState.current` is the active language (in-memory, defaults
+  to English) and `LanguageSelector()` switches it for the desktop host and the
+  Android/iOS remote at once. **Add a language:** add a value to the `Language`
+  enum and a matching `BeamStrings` bundle.
+- **Web (`web/`)** — `web/lib/i18n.tsx` holds the typed message bundles, the
+  `I18nProvider` (client; persists to `localStorage`, seeds from the browser
+  language), the `useI18n()` hook (`t.<area>.<key>`), and `<LanguageSwitcher />`.
+  The English bundle defines the shape; the others are typed `Dict` so a missing
+  key fails the build. **Add a language:** add it to `LOCALES`/`LOCALE_LABELS` and
+  a bundle matching `Dict`.
+- **Landing (`landing/`)** — the `I18N` object inside `index.html`; add a locale
+  key plus entries in `LOCALES`/`LABELS`.
+
+Persisting the native app's language choice across launches (via `ConnectionStore`)
+and detecting the system locale are small follow-ups; today it defaults to English
+and is switched in-app.
+
+## Landing site (`landing/`)
+
+A standalone static marketing page (single `index.html`, no build step),
+multilingual, with slots for demo videos. Deploy to Vercel with **Root Directory =
+`landing`** and Framework Preset **Other**, or `cd landing && vercel --prod`. Drop
+clips into `landing/videos/` (see `landing/README.md` for the expected filenames);
+each card falls back to a labelled placeholder until its file exists. This is
+separate from the in-app landing served by the Next.js `web/` project.
+
 ## Troubleshooting
 
 - Gradle serving a stale file / error on a line you already fixed: `./gradlew --stop`
@@ -160,6 +197,8 @@ until that desktop WebRTC peer exists.
 - [x] Mobile M4 — `:pdf` rendering (Desktop/Android/iOS) + notes sidecar.
 - [x] Mobile M5 — desktop presenter (load PDF, fullscreen projector, QR/IP/PIN, presenter view, ink).
 - [x] Mobile M6–8 — mobile remote (connect, deck picker, navigation, notes, timer, drawing).
+- [x] Internationalization — EN / PT-BR / ES / SV across the native app and the web (with switchers).
+- [x] Standalone multilingual landing site (`landing/`) with demo-video slots.
 - [ ] Web browser remote ↔ desktop (needs a WebRTC peer on the desktop host).
 - [ ] Polish: QR camera scanning on mobile, error/empty states, accessibility pass.
 
