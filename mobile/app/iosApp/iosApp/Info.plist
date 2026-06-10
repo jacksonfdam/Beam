@@ -4,5 +4,9 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Beam uses the camera to scan the connection QR code on the presenter screen.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Beam connects to the presenter on your local network.</string>
 </dict>
 </plist>
