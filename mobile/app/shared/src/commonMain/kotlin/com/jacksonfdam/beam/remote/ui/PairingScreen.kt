@@ -22,6 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.jacksonfdam.beam.i18n.LanguageSelector
+import com.jacksonfdam.beam.i18n.LocalStrings
+import com.jacksonfdam.beam.i18n.portOptionalText
 import com.jacksonfdam.beam.protocol.ConnectionState
 import com.jacksonfdam.beam.protocol.DEFAULT_PORT
 import com.jacksonfdam.beam.protocol.HostEndpoint
@@ -52,13 +55,16 @@ fun PairingScreen(
         buildEndpoint(scanned, pin)?.let { controller.connect(it, name.ifBlank { "Phone" }) }
     }
 
+    val strings = LocalStrings.current
+
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text("Connect to a host", style = MaterialTheme.typography.headlineSmall)
+        LanguageSelector(Modifier.fillMaxWidth())
+        Text(strings.connectToHost, style = MaterialTheme.typography.headlineSmall)
         Text(
-            "Scan the QR on the presenter screen, or enter the host's IP and PIN.",
+            strings.pairingHint,
             style = MaterialTheme.typography.bodyMedium,
         )
 
@@ -68,10 +74,10 @@ fun PairingScreen(
                 enabled = !busy,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Scan QR code")
+                Text(strings.scanQrCode)
             }
             Text(
-                "or enter manually",
+                strings.orEnterManually,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -80,16 +86,16 @@ fun PairingScreen(
         OutlinedTextField(
             value = host,
             onValueChange = { host = it },
-            label = { Text("Host IP") },
+            label = { Text(strings.hostIp) },
             placeholder = { Text("192.168.0.8") },
-            supportingText = { Text("Port is optional — defaults to $DEFAULT_PORT.") },
+            supportingText = { Text(strings.portOptionalText(DEFAULT_PORT)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
         OutlinedTextField(
             value = pin,
             onValueChange = { pin = it },
-            label = { Text("PIN") },
+            label = { Text(strings.pin) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
@@ -100,7 +106,7 @@ fun PairingScreen(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text("Your name (optional)") },
+            label = { Text(strings.yourNameOptional) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -120,7 +126,7 @@ fun PairingScreen(
             enabled = !busy && host.isNotBlank(),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(if (busy) "Connecting…" else "Connect")
+            Text(if (busy) strings.connecting else strings.connect)
         }
     }
 }

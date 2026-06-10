@@ -14,6 +14,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.jacksonfdam.beam.i18n.LocalStrings
+import com.jacksonfdam.beam.i18n.deckSubtitleText
 import com.jacksonfdam.beam.protocol.DeckInfo
 import com.jacksonfdam.beam.remote.Presentation
 import com.jacksonfdam.beam.remote.RemoteController
@@ -25,11 +27,11 @@ fun DeckPickerScreen(presentation: Presentation, controller: RemoteController) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         ConnectedHeader(controller)
-        Text("Choose a deck", style = MaterialTheme.typography.titleLarge)
+        Text(LocalStrings.current.chooseADeck, style = MaterialTheme.typography.titleLarge)
 
         if (presentation.decks.isEmpty()) {
             Text(
-                "No decks available yet. Open one on the host.",
+                LocalStrings.current.noDecksAvailable,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -49,7 +51,7 @@ private fun DeckRow(deck: DeckInfo, onClick: () -> Unit) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(deck.title, style = MaterialTheme.typography.titleMedium)
             Text(
-                "${deck.slideCount} slides${if (deck.hasNotes) " · notes" else ""}",
+                LocalStrings.current.deckSubtitleText(deck.slideCount, deck.hasNotes),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

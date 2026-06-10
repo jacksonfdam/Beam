@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.jacksonfdam.beam.i18n.LocalStrings
 import com.jacksonfdam.beam.protocol.NormPoint
 import com.jacksonfdam.beam.remote.HIGHLIGHT_COLOR_ARGB
 import com.jacksonfdam.beam.remote.HIGHLIGHT_WIDTH_DP
@@ -218,9 +219,9 @@ fun DrawingSurface(
                     completed.clear()
                     controller.clearInk()
                 },
-            ) { Text("Clear ink") }
+            ) { Text(LocalStrings.current.clearInk) }
             if (scale > 1f) {
-                OutlinedButton(onClick = { resetView() }) { Text("Reset zoom") }
+                OutlinedButton(onClick = { resetView() }) { Text(LocalStrings.current.resetZoom) }
             }
         }
     }

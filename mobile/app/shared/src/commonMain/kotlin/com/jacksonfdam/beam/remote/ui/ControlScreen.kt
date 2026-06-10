@@ -37,6 +37,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.jacksonfdam.beam.i18n.LocalStrings
+import com.jacksonfdam.beam.i18n.slideXofYText
 import com.jacksonfdam.beam.protocol.NavAction
 import com.jacksonfdam.beam.protocol.PresentMode
 import com.jacksonfdam.beam.protocol.TimerAction
@@ -47,6 +49,7 @@ import com.jacksonfdam.beam.remote.RemoteController
 fun ControlScreen(presentation: Presentation, controller: RemoteController) {
     var showDrawing by remember { mutableStateOf(false) }
     var tool by remember { mutableStateOf(DrawTool.PEN) }
+    val strings = LocalStrings.current
 
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
@@ -74,11 +77,11 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
             Button(
                 onClick = { controller.nav(NavAction.PREV) },
                 modifier = Modifier.weight(1f)
-            ) { Text("‹ Prev") }
+            ) { Text(strings.prev) }
             Button(
                 onClick = { controller.nav(NavAction.NEXT) },
                 modifier = Modifier.weight(1f)
-            ) { Text("Next ›") }
+            ) { Text(strings.next) }
         }
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -87,11 +90,11 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
             OutlinedButton(
                 onClick = { controller.nav(NavAction.FIRST) },
                 modifier = Modifier.weight(1f)
-            ) { Text("First") }
+            ) { Text(strings.first) }
             OutlinedButton(
                 onClick = { controller.nav(NavAction.LAST) },
                 modifier = Modifier.weight(1f)
-            ) { Text("Last") }
+            ) { Text(strings.last) }
         }
 
         NotesCard(presentation.notes, presentation.hasNotes)
@@ -103,7 +106,7 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
                 showDrawing = !showDrawing
             },
         ) {
-            Text(if (showDrawing) "Hide drawing" else if (slidesMode) "Draw on the slide" else "Draw / spotlight")
+            Text(if (showDrawing) strings.hideDrawing else if (slidesMode) strings.drawOnSlide else strings.drawSpotlight)
         }
         if (showDrawing) {
             val effectiveTool = if (slidesMode && tool == DrawTool.SPOTLIGHT) DrawTool.PEN else tool
@@ -123,9 +126,10 @@ fun ControlScreen(presentation: Presentation, controller: RemoteController) {
 
 @Composable
 private fun ModeToggle(mode: PresentMode, onSetMode: (PresentMode) -> Unit) {
+    val strings = LocalStrings.current
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        ModeButton("Slides", mode == PresentMode.SLIDES, Modifier.weight(1f)) { onSetMode(PresentMode.SLIDES) }
-        ModeButton("Screen", mode == PresentMode.SCREEN, Modifier.weight(1f)) { onSetMode(PresentMode.SCREEN) }
+        ModeButton(strings.slidesMode, mode == PresentMode.SLIDES, Modifier.weight(1f)) { onSetMode(PresentMode.SLIDES) }
+        ModeButton(strings.screenMode, mode == PresentMode.SCREEN, Modifier.weight(1f)) { onSetMode(PresentMode.SCREEN) }
     }
 }
 
@@ -144,30 +148,33 @@ private fun ModeButton(label: String, selected: Boolean, modifier: Modifier, onC
 
 @Composable
 private fun InteractToggle(interacting: Boolean, onSet: (Boolean) -> Unit) {
+    val strings = LocalStrings.current
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        ModeButton("Annotate", !interacting, Modifier.weight(1f)) { onSet(false) }
-        ModeButton("Interact", interacting, Modifier.weight(1f)) { onSet(true) }
+        ModeButton(strings.annotate, !interacting, Modifier.weight(1f)) { onSet(false) }
+        ModeButton(strings.interact, interacting, Modifier.weight(1f)) { onSet(true) }
     }
 }
 
 @Composable
 private fun ToolSelector(tool: DrawTool, allowSpotlight: Boolean, onSelect: (DrawTool) -> Unit) {
+    val strings = LocalStrings.current
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        ModeButton("Pen", tool == DrawTool.PEN, Modifier.weight(1f)) { onSelect(DrawTool.PEN) }
-        ModeButton("Marker", tool == DrawTool.HIGHLIGHTER, Modifier.weight(1f)) { onSelect(DrawTool.HIGHLIGHTER) }
+        ModeButton(strings.pen, tool == DrawTool.PEN, Modifier.weight(1f)) { onSelect(DrawTool.PEN) }
+        ModeButton(strings.marker, tool == DrawTool.HIGHLIGHTER, Modifier.weight(1f)) { onSelect(DrawTool.HIGHLIGHTER) }
         if (allowSpotlight) {
-            ModeButton("Spotlight", tool == DrawTool.SPOTLIGHT, Modifier.weight(1f)) { onSelect(DrawTool.SPOTLIGHT) }
+            ModeButton(strings.spotlight, tool == DrawTool.SPOTLIGHT, Modifier.weight(1f)) { onSelect(DrawTool.SPOTLIGHT) }
         }
     }
 }
 
 @Composable
 private fun ScreenModeNote() {
+    val strings = LocalStrings.current
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Projecting your screen", style = MaterialTheme.typography.titleMedium)
+            Text(strings.projectingYourScreen, style = MaterialTheme.typography.titleMedium)
             Text(
-                "Your live desktop is shown — slides advance underneath. Tap Slides to project the deck again, or draw to annotate over your screen.",
+                strings.screenModeBody,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -196,7 +203,7 @@ private fun SlidePreview(image: ImageBitmap) {
         ) {
             Image(
                 bitmap = image,
-                contentDescription = "Slide preview — pinch to zoom",
+                contentDescription = LocalStrings.current.slidePreviewCd,
                 modifier = Modifier
                     .fillMaxWidth()
                     .graphicsLayer {
@@ -224,7 +231,7 @@ private fun SlideIndicator(index: Int, total: Int) {
                 textAlign = TextAlign.Center,
             )
             Text(
-                "Slide",
+                LocalStrings.current.slideLabel,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -234,16 +241,17 @@ private fun SlideIndicator(index: Int, total: Int) {
 
 @Composable
 private fun NotesCard(notes: String?, hasNotes: Boolean) {
+    val strings = LocalStrings.current
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                "Speaker notes",
+                strings.speakerNotes,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 notes
-                    ?: if (hasNotes) "No notes for this slide." else "This deck has no notes sidecar.",
+                    ?: if (hasNotes) strings.noNotesForSlide else strings.noNotesSidecar,
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
@@ -252,11 +260,12 @@ private fun NotesCard(notes: String?, hasNotes: Boolean) {
 
 @Composable
 private fun TimerCard(elapsedMs: Long, running: Boolean, controller: RemoteController) {
+    val strings = LocalStrings.current
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "Timer",
+                    strings.timer,
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -274,11 +283,11 @@ private fun TimerCard(elapsedMs: Long, running: Boolean, controller: RemoteContr
                 OutlinedButton(
                     onClick = { controller.timer(if (running) TimerAction.PAUSE else TimerAction.START) },
                     modifier = Modifier.weight(1f),
-                ) { Text(if (running) "Pause" else "Start") }
+                ) { Text(if (running) strings.pause else strings.start) }
                 OutlinedButton(
                     onClick = { controller.timer(TimerAction.RESET) },
                     modifier = Modifier.weight(1f)
-                ) { Text("Reset") }
+                ) { Text(strings.reset) }
             }
         }
     }

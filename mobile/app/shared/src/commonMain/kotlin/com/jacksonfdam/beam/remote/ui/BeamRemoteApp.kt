@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import com.jacksonfdam.beam.i18n.ProvideStrings
 import com.jacksonfdam.beam.protocol.ConnectionState
 import com.jacksonfdam.beam.protocol.HostEndpoint
 import com.jacksonfdam.beam.remote.ConnectionStore
@@ -27,6 +28,7 @@ import com.jacksonfdam.beam.transport.KtorPresenterClient
 @Composable
 fun BeamRemoteApp(store: ConnectionStore = NoopConnectionStore) {
     MaterialTheme {
+        ProvideStrings {
         val scope = rememberCoroutineScope()
         val controller = remember { RemoteController(scope, KtorPresenterClient(scope), store) }
         val connection by controller.connection.collectAsState()
@@ -54,6 +56,7 @@ fun BeamRemoteApp(store: ConnectionStore = NoopConnectionStore) {
                     else -> PairingScreen(connection, presentation, controller)
                 }
             }
+        }
         }
     }
 }

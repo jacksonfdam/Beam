@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.jacksonfdam.beam.i18n.LocalStrings
 import com.jacksonfdam.beam.remote.RemoteController
 
 @Composable
@@ -24,9 +25,9 @@ fun ConnectedHeader(controller: RemoteController) {
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Box(Modifier.size(10.dp).clip(CircleShape).background(Color(0xFF34D399)))
-        Text("Connected", style = MaterialTheme.typography.bodyMedium)
+        Text(LocalStrings.current.connected, style = MaterialTheme.typography.bodyMedium)
         Box(Modifier.weight(1f))
-        TextButton(onClick = { controller.disconnect() }) { Text("Disconnect") }
+        TextButton(onClick = { controller.disconnect() }) { Text(LocalStrings.current.disconnect) }
     }
 }
 
