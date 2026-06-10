@@ -56,7 +56,10 @@ class KtorPresenterServer(
     override suspend fun start(port: Int, pin: String?): HostEndpoint {
         this.pin = pin
         val engine = embeddedServer(CIO, port = port) {
-            install(WebSockets)
+            install(WebSockets) {
+                // Slide-image frames (Base64 PNG) are larger than control messages.
+                maxFrameSize = MAX_FRAME_SIZE
+            }
             routing {
                 webSocket(CUE_PATH) { handleClient() }
             }
