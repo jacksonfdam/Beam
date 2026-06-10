@@ -20,6 +20,7 @@ import com.jacksonfdam.beam.presenter.ProjectorScreen
 import com.jacksonfdam.beam.presenter.SlideImages
 import com.jacksonfdam.beam.presenter.SlidePng
 import com.jacksonfdam.beam.protocol.DEFAULT_PORT
+import com.jacksonfdam.beam.protocol.PresentMode
 import com.jacksonfdam.beam.transport.KtorPresenterServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -71,6 +72,7 @@ fun main() = application {
                         }
                     }
                 },
+                onSetMode = { mode -> appScope.launch { session.setMode(mode) } },
             )
         }
     }
@@ -85,6 +87,8 @@ fun main() = application {
         state = projectorState,
         title = "Beam — Projector",
         undecorated = true,
+        // In SCREEN mode the projector hides so the real desktop (a demo/code) shows.
+        visible = state.presentMode == PresentMode.SLIDES,
     ) {
         MaterialTheme(colorScheme = darkColorScheme()) {
             val slide = remember(state.currentDeckId, state.slideIndex) {

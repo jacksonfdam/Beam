@@ -2,6 +2,7 @@ package com.jacksonfdam.beam.host
 
 import com.jacksonfdam.beam.protocol.DeckInfo
 import com.jacksonfdam.beam.protocol.HostEndpoint
+import com.jacksonfdam.beam.protocol.PresentMode
 
 /** Everything the presenter UI renders. The host is the single source of truth. */
 data class HostState(
@@ -16,6 +17,7 @@ data class HostState(
     val timerElapsedMs: Long = 0,
     val timerRunning: Boolean = false,
     val strokes: List<InkStroke> = emptyList(),
+    val presentMode: PresentMode = PresentMode.SLIDES,
 ) {
     val hasDeck: Boolean get() = currentDeckId != null && slideTotal > 0
 }

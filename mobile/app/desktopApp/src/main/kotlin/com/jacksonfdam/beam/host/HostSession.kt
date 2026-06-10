@@ -7,12 +7,15 @@ import com.jacksonfdam.beam.protocol.GoTo
 import com.jacksonfdam.beam.protocol.Hello
 import com.jacksonfdam.beam.protocol.HelloAck
 import com.jacksonfdam.beam.protocol.HostEndpoint
+import com.jacksonfdam.beam.protocol.ModeChanged
 import com.jacksonfdam.beam.protocol.Nav
 import com.jacksonfdam.beam.protocol.NavAction
+import com.jacksonfdam.beam.protocol.PresentMode
 import com.jacksonfdam.beam.protocol.Ping
 import com.jacksonfdam.beam.protocol.Pong
 import com.jacksonfdam.beam.protocol.PresenterServer
 import com.jacksonfdam.beam.protocol.SelectDeck
+import com.jacksonfdam.beam.protocol.SetMode
 import com.jacksonfdam.beam.pdf.PdfDocument
 import com.jacksonfdam.beam.protocol.SlideChanged
 import com.jacksonfdam.beam.protocol.SlideImage
@@ -107,7 +110,15 @@ class HostSession(
             }
 
             is Ping -> server.broadcast(Pong)
+            is SetMode -> setMode(msg.mode)
         }
+    }
+
+    /** Switch the projector between slides and the host's live screen. */
+    suspend fun setMode(mode: PresentMode) {
+        if (_state.value.presentMode == mode) return
+        _state.update { it.copy(presentMode = mode) }
+        server.broadcast(ModeChanged(mode))
     }
 
     private suspend fun selectDeck(id: String) {
@@ -219,6 +230,7 @@ class HostSession(
             encodeSlide(deck.document, index)?.let { server.broadcast(SlideImage(index, it)) }
         }
         server.broadcast(TimerState(elapsedMs(), timerRunning))
+        server.broadcast(ModeChanged(_state.value.presentMode))
     }
 
     /** Build the HelloAck the transport sends to each newly accepted client. */

@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -28,6 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.jacksonfdam.beam.host.HostDeck
 import com.jacksonfdam.beam.host.HostState
+import com.jacksonfdam.beam.protocol.PresentMode
 
 /** The presenter's control window: live preview, next slide, notes, timer, and the connection card. */
 @Composable
@@ -35,6 +37,7 @@ fun PresenterControlScreen(
     state: HostState,
     deck: HostDeck?,
     onOpenDeck: () -> Unit,
+    onSetMode: (PresentMode) -> Unit = {},
 ) {
     Column(
         modifier = Modifier.fillMaxSize().padding(20.dp),
@@ -45,6 +48,7 @@ fun PresenterControlScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text("Beam", style = MaterialTheme.typography.headlineSmall)
+            ModeToggle(state.presentMode, onSetMode)
             Box(Modifier.weight(1f))
             Text(
                 "${state.clientCount} remote${if (state.clientCount == 1) "" else "s"} connected",
@@ -83,6 +87,23 @@ fun PresenterControlScreen(
                 NotesCard(state.currentNotes, deck != null)
             }
         }
+    }
+}
+
+@Composable
+private fun ModeToggle(mode: PresentMode, onSetMode: (PresentMode) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        ModeButton("Slides", mode == PresentMode.SLIDES) { onSetMode(PresentMode.SLIDES) }
+        ModeButton("Screen", mode == PresentMode.SCREEN) { onSetMode(PresentMode.SCREEN) }
+    }
+}
+
+@Composable
+private fun ModeButton(label: String, selected: Boolean, onClick: () -> Unit) {
+    if (selected) {
+        Button(onClick = onClick) { Text(label) }
+    } else {
+        OutlinedButton(onClick = onClick) { Text(label) }
     }
 }
 
