@@ -2,8 +2,12 @@ package com.jacksonfdam.beam.remote.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -82,11 +86,12 @@ fun DrawingSurface(
 
     val aspect = slide?.let { it.width.toFloat() / it.height.toFloat() } ?: fallbackAspect
 
-    Canvas(
-        modifier
-            .fillMaxWidth()
-            .aspectRatio(aspect)
-            .onSizeChanged { size = it }
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Canvas(
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(aspect)
+                .onSizeChanged { size = it }
             .pointerInput(slideKey, tool) {
                 detectDragGestures(
                     onDragStart = { offset ->
@@ -174,6 +179,17 @@ fun DrawingSurface(
                 size = Size(kotlin.math.abs(c.x - s.x), kotlin.math.abs(c.y - s.y)),
                 style = Stroke(width = 2.dp.toPx()),
             )
+        }
+        }
+
+        OutlinedButton(
+            onClick = {
+                active.clear()
+                completed.clear()
+                controller.clearInk()
+            },
+        ) {
+            Text("Clear ink")
         }
     }
 }
