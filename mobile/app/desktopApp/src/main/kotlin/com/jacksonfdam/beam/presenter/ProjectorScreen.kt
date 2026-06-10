@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.jacksonfdam.beam.host.InkStroke
+import com.jacksonfdam.beam.i18n.LocalStrings
 import kotlin.math.roundToInt
 
 /**
@@ -34,7 +35,7 @@ fun ProjectorScreen(
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         if (slide == null) {
             Text(
-                "Waiting for a deck…",
+                LocalStrings.current.waitingForDeck,
                 color = Color.White.copy(alpha = 0.7f),
                 modifier = Modifier.align(Alignment.Center)
             )

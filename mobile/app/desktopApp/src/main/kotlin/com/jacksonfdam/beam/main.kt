@@ -12,12 +12,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.jacksonfdam.beam.host.DeckLoader
 import com.jacksonfdam.beam.host.HostSession
+import com.jacksonfdam.beam.i18n.ProvideStrings
 import com.jacksonfdam.beam.presenter.InkOverlayScreen
 import com.jacksonfdam.beam.presenter.PresenterControlScreen
 import com.jacksonfdam.beam.presenter.ProjectorScreen
@@ -72,41 +72,50 @@ fun main() = application {
 
     Window(onCloseRequest = ::exitApplication, title = "Beam — Presenter") {
         MaterialTheme(colorScheme = darkColorScheme()) {
-            PresenterControlScreen(
-                state = state,
-                deck = deck,
-                startError = startError,
-                onOpenDeck = {
-                    pickPdf(window)?.let { file ->
-                        appScope.launch {
-                            val loaded = withContext(Dispatchers.IO) { DeckLoader.load(file) }
-                            session.openDeck(loaded)
+            ProvideStrings {
+                PresenterControlScreen(
+                    state = state,
+                    deck = deck,
+                    startError = startError,
+                    onOpenDeck = {
+                        pickPdf(window)?.let { file ->
+                            appScope.launch {
+                                val loaded = withContext(Dispatchers.IO) { DeckLoader.load(file) }
+                                session.openDeck(loaded)
+                            }
                         }
-                    }
-                },
-                onSetMode = { mode -> appScope.launch { session.setMode(mode) } },
-            )
+                    },
+                    onSetMode = { mode -> appScope.launch { session.setMode(mode) } },
+                )
+            }
         }
     }
 
-    // Fullscreen projector — on the external display when one is present.
+    // Projector — borderless window sized to fully cover the target display
+    // (the external screen when one is present). On macOS, an `undecorated`
+    // window with WindowPlacement.Fullscreen does NOT enter real fullscreen and
+    // leaves the slide in a small default-size window, so we size and position
+    // it explicitly to the screen bounds (the same approach the overlay uses).
     val projectorState = rememberWindowState(
-        placement = WindowPlacement.Fullscreen,
         position = projectorPosition(),
+        size = projectorSize(),
     )
     Window(
         onCloseRequest = {},
         state = projectorState,
         title = "Beam — Projector",
         undecorated = true,
+        resizable = false,
         // In SCREEN mode the projector hides so the real desktop (a demo/code) shows.
         visible = state.presentMode == PresentMode.SLIDES,
     ) {
         MaterialTheme(colorScheme = darkColorScheme()) {
-            val slide = remember(state.currentDeckId, state.slideIndex) {
-                deck?.let { runCatching { SlideImages.render(it.document, state.slideIndex, 1920) }.getOrNull() }
+            ProvideStrings {
+                val slide = remember(state.currentDeckId, state.slideIndex) {
+                    deck?.let { runCatching { SlideImages.render(it.document, state.slideIndex, 1920) }.getOrNull() }
+                }
+                ProjectorScreen(slide = slide, strokes = state.strokes)
             }
-            ProjectorScreen(slide = slide, strokes = state.strokes)
         }
     }
 

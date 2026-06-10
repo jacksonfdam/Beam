@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.jacksonfdam.beam.i18n.LocalStrings
+import com.jacksonfdam.beam.i18n.connectionQrText
 import com.jacksonfdam.beam.protocol.HostEndpoint
 import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 
@@ -27,10 +29,11 @@ fun ConnectionCard(endpoint: HostEndpoint, pin: String?, modifier: Modifier = Mo
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("Scan to connect", style = MaterialTheme.typography.titleMedium)
+            val strings = LocalStrings.current
+            Text(strings.scanToConnect, style = MaterialTheme.typography.titleMedium)
             Image(
                 painter = rememberQrCodePainter(endpoint.toUri()),
-                contentDescription = "Connection QR code for ${endpoint.host}",
+                contentDescription = strings.connectionQrText(endpoint.host),
                 modifier = Modifier
                     .size(200.dp)
                     .clip(RoundedCornerShape(8.dp)),
@@ -41,13 +44,13 @@ fun ConnectionCard(endpoint: HostEndpoint, pin: String?, modifier: Modifier = Mo
             )
             if (!pin.isNullOrEmpty()) {
                 Text(
-                    "PIN $pin",
+                    "${strings.pin} $pin",
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
             Text(
-                "Same Wi-Fi, no sign-in. Slides stay on your network.",
+                strings.sameWifi,
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray,
             )

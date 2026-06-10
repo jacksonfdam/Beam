@@ -29,6 +29,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.jacksonfdam.beam.host.HostDeck
 import com.jacksonfdam.beam.host.HostState
+import com.jacksonfdam.beam.i18n.LocalStrings
+import com.jacksonfdam.beam.i18n.portHeldText
+import com.jacksonfdam.beam.i18n.remotesConnectedText
+import com.jacksonfdam.beam.i18n.slideXofYText
+import com.jacksonfdam.beam.protocol.DEFAULT_PORT
 import com.jacksonfdam.beam.protocol.PresentMode
 
 /** The presenter's control window: live preview, next slide, notes, timer, and the connection card. */
@@ -40,6 +45,7 @@ fun PresenterControlScreen(
     onOpenDeck: () -> Unit,
     onSetMode: (PresentMode) -> Unit = {},
 ) {
+    val strings = LocalStrings.current
     Column(
         modifier = Modifier.fillMaxSize().padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -50,13 +56,14 @@ fun PresenterControlScreen(
         ) {
             Text("Beam", style = MaterialTheme.typography.headlineSmall)
             ModeToggle(state.presentMode, onSetMode)
+            com.jacksonfdam.beam.i18n.LanguageSelector()
             Box(Modifier.weight(1f))
             Text(
-                "${state.clientCount} remote${if (state.clientCount == 1) "" else "s"} connected",
+                strings.remotesConnectedText(state.clientCount),
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (state.clientCount > 0) MaterialTheme.colorScheme.primary else Color.Gray,
             )
-            Button(onClick = onOpenDeck) { Text(if (deck == null) "Open a PDF" else "Open another PDF") }
+            Button(onClick = onOpenDeck) { Text(if (deck == null) strings.openAPdf else strings.openAnotherPdf) }
         }
 
         Row(
@@ -92,9 +99,10 @@ fun PresenterControlScreen(
 
 @Composable
 private fun ModeToggle(mode: PresentMode, onSetMode: (PresentMode) -> Unit) {
+    val strings = LocalStrings.current
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        ModeButton("Slides", mode == PresentMode.SLIDES) { onSetMode(PresentMode.SLIDES) }
-        ModeButton("Screen", mode == PresentMode.SCREEN) { onSetMode(PresentMode.SCREEN) }
+        ModeButton(strings.slidesMode, mode == PresentMode.SLIDES) { onSetMode(PresentMode.SLIDES) }
+        ModeButton(strings.screenMode, mode == PresentMode.SCREEN) { onSetMode(PresentMode.SCREEN) }
     }
 }
 
@@ -109,10 +117,11 @@ private fun ModeButton(label: String, selected: Boolean, onClick: () -> Unit) {
 
 @Composable
 private fun CurrentSlide(state: HostState, deck: HostDeck?, modifier: Modifier = Modifier) {
+    val strings = LocalStrings.current
     Card(modifier = modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                if (state.hasDeck) "Slide ${state.slideIndex + 1} / ${state.slideTotal}" else "No deck loaded",
+                if (state.hasDeck) strings.slideXofYText(state.slideIndex + 1, state.slideTotal) else strings.noDeckLoaded,
                 style = MaterialTheme.typography.titleMedium,
             )
             val preview = remember(deck?.info?.id, state.slideIndex) {
@@ -133,12 +142,12 @@ private fun CurrentSlide(state: HostState, deck: HostDeck?, modifier: Modifier =
                 if (preview != null) {
                     Image(
                         preview,
-                        contentDescription = "Current slide",
+                        contentDescription = strings.currentSlideCd,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit
                     )
                 } else {
-                    Text("Open a PDF and press Start on a remote", color = Color.Gray)
+                    Text(strings.openPdfPressStart, color = Color.Gray)
                 }
             }
         }
@@ -159,13 +168,14 @@ private fun NextSlide(state: HostState, deck: HostDeck?) {
             }.getOrNull()
         }
     }
+    val strings = LocalStrings.current
     Card {
         Row(
             Modifier.padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Next", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
+            Text(strings.nextLabel, style = MaterialTheme.typography.labelLarge, color = Color.Gray)
             Box(
                 Modifier.width(160.dp).aspectRatio(16f / 9f).background(Color.Black)
                     .clip(RoundedCornerShape(4.dp)), contentAlignment = Alignment.Center
@@ -173,13 +183,13 @@ private fun NextSlide(state: HostState, deck: HostDeck?) {
                 if (next != null) {
                     Image(
                         next,
-                        contentDescription = "Next slide",
+                        contentDescription = strings.nextSlideCd,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit
                     )
                 } else {
                     Text(
-                        if (hasNext) "…" else "End",
+                        if (hasNext) "…" else strings.end,
                         color = Color.Gray,
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -191,16 +201,17 @@ private fun NextSlide(state: HostState, deck: HostDeck?) {
 
 @Composable
 private fun ServerStatusCard(error: String?) {
+    val strings = LocalStrings.current
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Connection", style = MaterialTheme.typography.titleMedium)
+            Text(strings.connectionTitle, style = MaterialTheme.typography.titleMedium)
             if (error == null) {
-                Text("Starting the server…", color = Color.Gray)
+                Text(strings.startingServer, color = Color.Gray)
             } else {
-                Text("Couldn't start the server.", color = MaterialTheme.colorScheme.error)
+                Text(strings.couldntStartServer, color = MaterialTheme.colorScheme.error)
                 Text(error, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 Text(
-                    "Port ${com.jacksonfdam.beam.protocol.DEFAULT_PORT} may be held by another Beam window — quit it and relaunch.",
+                    strings.portHeldText(DEFAULT_PORT),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray,
                 )
@@ -211,12 +222,13 @@ private fun ServerStatusCard(error: String?) {
 
 @Composable
 private fun TimerCard(elapsedMs: Long, running: Boolean) {
+    val strings = LocalStrings.current
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Timer", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
+            Text(strings.timer, style = MaterialTheme.typography.labelLarge, color = Color.Gray)
             Text(formatElapsed(elapsedMs), style = MaterialTheme.typography.headlineMedium)
             Text(
-                if (running) "Running" else "Paused",
+                if (running) strings.running else strings.paused,
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )
@@ -226,11 +238,12 @@ private fun TimerCard(elapsedMs: Long, running: Boolean) {
 
 @Composable
 private fun NotesCard(notes: String?, hasDeck: Boolean) {
+    val strings = LocalStrings.current
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Speaker notes", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
+            Text(strings.speakerNotes, style = MaterialTheme.typography.labelLarge, color = Color.Gray)
             Text(
-                notes ?: if (hasDeck) "No notes for this slide." else "Load a deck to see notes.",
+                notes ?: if (hasDeck) strings.noNotesForSlide else strings.loadDeckToSeeNotes,
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
