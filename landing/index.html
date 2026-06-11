@@ -137,6 +137,14 @@
     .about-body a { color: var(--beam-glow); text-decoration: underline; text-underline-offset: 3px; }
     .about-body .sig { color: var(--white); font-weight: 600; margin-top: 4px; }
 
+    /* Get started */
+    .cmd { margin-top: 22px; max-width: 560px; overflow-x: auto; background: var(--ink); border: 1px solid var(--ink-line); border-radius: var(--radius); padding: 16px 18px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; line-height: 1.7; color: var(--beam-glow); }
+    .cmd code { white-space: pre; }
+    .note { margin-top: 18px; max-width: 640px; color: var(--muted); font-size: 14px; }
+    .note a, .repo a { color: var(--beam-glow); text-decoration: underline; text-underline-offset: 3px; }
+    .repo { margin-top: 10px; font-size: 13px; color: color-mix(in srgb, var(--white) 45%, transparent); }
+    .repo a { color: inherit; }
+
     /* Steps */
     .steps { margin-top: 44px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
     .step { border: 1px solid var(--ink-line); border-radius: var(--radius); background: color-mix(in srgb, var(--ink-soft) 40%, transparent); padding: 22px; }
@@ -174,7 +182,7 @@
           <button class="lang-btn" id="lang-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Language"></button>
           <ul class="lang-menu" id="lang-menu" role="listbox" hidden></ul>
         </div>
-        <a class="cta" href="#download" data-i18n="nav.download">Download</a>
+        <a class="cta" href="#download" data-i18n="nav.download">Get started</a>
       </nav>
     </div>
   </header>
@@ -188,7 +196,7 @@
         <p class="sub" data-i18n="hero.sub">Beam projects your exported PDF fullscreen on the big screen and turns your phone into the remote — flip slides, draw on the live slide, spotlight a detail, glance at your speaker notes, and watch the clock. Everything stays on your own Wi‑Fi.</p>
         <p class="flow" data-i18n="hero.flow">PAIR · PRESENT · ANNOTATE</p>
         <div class="actions">
-          <a class="btn-primary" href="#download" data-i18n="hero.download">Download Beam</a>
+          <a class="btn-primary" href="#download" data-i18n="hero.download">Get started</a>
           <a class="btn-ghost" href="#demos" data-i18n="hero.watch">Watch the demos</a>
         </div>
       </div>
@@ -228,8 +236,13 @@
 
     <section class="block alt" id="download">
       <div class="wrap">
-        <h2 data-i18n="download.heading">Download Beam</h2>
-        <p class="lead" data-i18n="download.lead">The desktop app is the presenter and host. The mobile app is the remote. Builds are on the way.</p>
+        <h2 data-i18n="download.heading">Get started</h2>
+        <p class="lead" data-i18n="download.lead">No app-store build yet — and you don't need one. Clone the repo and run ./beam: it sets up everything, starts the web, runs the desktop host, and installs the mobile remote straight to a connected phone. No store, no certificate.</p>
+        <pre class="cmd"><code>git clone https://github.com/jacksonfdam/Beam.git
+cd Beam
+./beam</code></pre>
+        <p class="note" data-i18n="download.browserNote">On any other device, just open the browser remote — no install at all.</p>
+        <p class="repo"><a href="https://github.com/jacksonfdam/Beam" target="_blank" rel="noopener">github.com/jacksonfdam/Beam</a></p>
       </div>
     </section>
   </main>
@@ -257,7 +270,7 @@
     // --- i18n dictionaries ---------------------------------------------------
     const I18N = {
       en: {
-        nav: { features: "Features", connect: "How to connect", about: "About", download: "Download" },
+        nav: { features: "Features", connect: "How to connect", about: "About", download: "Get started" },
         about: {
           heading: "Why Beam exists",
           bodyHtml: "<p>Beam started from a real problem. Preparing a talk for <a href=\"https://mdevcamp.eu/\" target=\"_blank\" rel=\"noopener\">mdevcamp.eu</a>, I had to jump between slides and four live demos while keeping an eye on my speaker notes and the clock — and do it smoothly. So I built a scrappy first version just to get through the talk.</p><p>It worked, so I kept going and grew it into what you see here — proudly built with Compose Multiplatform. Then it hit me that other speakers probably want the same thing, so I decided to share it.</p><p class=\"sig\">— Jackson Mafra (<a href=\"https://github.com/jacksonfdam\" target=\"_blank\" rel=\"noopener\">jacksonfdam</a>)</p>",
@@ -266,12 +279,16 @@
           badge: "Local-first presenter remote",
           title: "Run your whole talk from your phone.",
           sub: "Beam projects your exported PDF fullscreen on the big screen and turns your phone into the remote — flip slides, draw on the live slide, spotlight a detail, glance at your speaker notes, and watch the clock. Everything stays on your own Wi‑Fi.",
-          flow: "PAIR · PRESENT · ANNOTATE", download: "Download Beam", watch: "Watch the demos",
+          flow: "PAIR · PRESENT · ANNOTATE", download: "Get started", watch: "Watch the demos",
         },
         demos: { heading: "See Beam in action", lead: "Short clips of the real app. Replace the placeholders with your own recordings." },
         features: { heading: "Everything a talk needs, nothing it doesn’t", lead: "Beam presents — it doesn’t author. That focus keeps it fast, private, and dead simple." },
         connect: { heading: "How to connect", lead: "Two devices, one Wi-Fi network, a short PIN. No sign-in, no pairing servers." },
-        download: { heading: "Download Beam", lead: "The desktop app is the presenter and host. The mobile app is the remote. Builds are on the way." },
+        download: {
+          heading: "Get started",
+          lead: "No app-store build yet — and you don't need one. Clone the repo and run ./beam: it sets up everything, starts the web, runs the desktop host, and installs the mobile remote straight to a connected phone. No store, no certificate.",
+          browserNote: "On any other device, just open the browser remote — no install at all.",
+        },
         footer: {
           tagline: "A local-first PDF presenter you drive from your phone.",
           privacyHeading: "What leaves your device",
@@ -298,7 +315,7 @@
         ],
       },
       "pt-BR": {
-        nav: { features: "Recursos", connect: "Como conectar", about: "Sobre", download: "Baixar" },
+        nav: { features: "Recursos", connect: "Como conectar", about: "Sobre", download: "Começar" },
         about: {
           heading: "Por que o Beam existe",
           bodyHtml: "<p>O Beam nasceu de um problema real. Preparando uma palestra para o <a href=\"https://mdevcamp.eu/\" target=\"_blank\" rel=\"noopener\">mdevcamp.eu</a>, eu precisava alternar entre os slides e quatro demos ao vivo enquanto ficava de olho nas minhas notas e no tempo — e fazer isso sem travar. Então fiz uma primeira versão simples só para dar conta da palestra.</p><p>Funcionou, então continuei e a evoluí até o que você vê aqui — feito com orgulho em Compose Multiplatform. Depois percebi que outros palestrantes provavelmente querem a mesma coisa, e decidi compartilhar.</p><p class=\"sig\">— Jackson Mafra (<a href=\"https://github.com/jacksonfdam\" target=\"_blank\" rel=\"noopener\">jacksonfdam</a>)</p>",
@@ -307,12 +324,16 @@
           badge: "Controle de apresentação local-first",
           title: "Conduza sua palestra inteira pelo celular.",
           sub: "O Beam projeta seu PDF exportado em tela cheia e transforma o celular no controle — passe os slides, desenhe sobre o slide ao vivo, dê destaque a um detalhe, consulte suas notas e acompanhe o tempo. Tudo no seu próprio Wi‑Fi.",
-          flow: "PAREAR · APRESENTAR · ANOTAR", download: "Baixar o Beam", watch: "Ver as demos",
+          flow: "PAREAR · APRESENTAR · ANOTAR", download: "Começar", watch: "Ver as demos",
         },
         demos: { heading: "Veja o Beam em ação", lead: "Clipes curtos do app real. Troque os placeholders pelas suas próprias gravações." },
         features: { heading: "Tudo o que uma palestra precisa, nada além disso", lead: "O Beam apresenta — não edita. Esse foco o mantém rápido, privado e simples." },
         connect: { heading: "Como conectar", lead: "Dois dispositivos, uma rede Wi-Fi, um PIN curto. Sem login, sem servidores de pareamento." },
-        download: { heading: "Baixar o Beam", lead: "O app desktop é o apresentador e host. O app mobile é o controle. As builds estão a caminho." },
+        download: {
+          heading: "Começar",
+          lead: "Ainda não há build em loja — e você não precisa. Clone o repositório e rode ./beam: ele configura tudo, sobe a web, roda o host no desktop e instala o controle direto num celular conectado. Sem loja, sem certificado.",
+          browserNote: "Em qualquer outro aparelho, é só abrir o controle no navegador — sem instalar nada.",
+        },
         footer: {
           tagline: "Um apresentador de PDF local-first que você controla pelo celular.",
           privacyHeading: "O que sai do seu dispositivo",
@@ -340,7 +361,7 @@
         ],
       },
       es: {
-        nav: { features: "Funciones", connect: "Cómo conectar", about: "Acerca", download: "Descargar" },
+        nav: { features: "Funciones", connect: "Cómo conectar", about: "Acerca", download: "Empezar" },
         about: {
           heading: "Por qué existe Beam",
           bodyHtml: "<p>Beam nació de un problema real. Preparando una charla para <a href=\"https://mdevcamp.eu/\" target=\"_blank\" rel=\"noopener\">mdevcamp.eu</a>, tenía que alternar entre las diapositivas y cuatro demos en vivo mientras vigilaba mis notas y el tiempo — y hacerlo con fluidez. Así que armé una primera versión sencilla solo para salir adelante en la charla.</p><p>Funcionó, así que seguí y la convertí en lo que ves aquí — hecho con orgullo en Compose Multiplatform. Luego me di cuenta de que otros ponentes seguramente quieren lo mismo, y decidí compartirlo.</p><p class=\"sig\">— Jackson Mafra (<a href=\"https://github.com/jacksonfdam\" target=\"_blank\" rel=\"noopener\">jacksonfdam</a>)</p>",
@@ -349,12 +370,16 @@
           badge: "Control de presentación local-first",
           title: "Controla toda tu charla desde el teléfono.",
           sub: "Beam proyecta tu PDF exportado a pantalla completa y convierte tu teléfono en el control — pasa diapositivas, dibuja sobre la diapositiva en vivo, enfoca un detalle, consulta tus notas y vigila el tiempo. Todo en tu propia red Wi‑Fi.",
-          flow: "EMPAREJAR · PRESENTAR · ANOTAR", download: "Descargar Beam", watch: "Ver las demos",
+          flow: "EMPAREJAR · PRESENTAR · ANOTAR", download: "Empezar", watch: "Ver las demos",
         },
         demos: { heading: "Mira Beam en acción", lead: "Clips cortos de la app real. Reemplaza los marcadores con tus propias grabaciones." },
         features: { heading: "Todo lo que necesita una charla, nada más", lead: "Beam presenta — no edita. Ese enfoque lo mantiene rápido, privado y simplísimo." },
         connect: { heading: "Cómo conectar", lead: "Dos dispositivos, una red Wi-Fi, un PIN corto. Sin inicio de sesión, sin servidores de emparejamiento." },
-        download: { heading: "Descargar Beam", lead: "La app de escritorio es el presentador y host. La app móvil es el control. Las versiones están en camino." },
+        download: {
+          heading: "Empezar",
+          lead: "Todavía no hay build en la tienda — y no la necesitas. Clona el repositorio y ejecuta ./beam: configura todo, levanta la web, ejecuta el host en el escritorio e instala el control directamente en un teléfono conectado. Sin tienda, sin certificado.",
+          browserNote: "En cualquier otro dispositivo, solo abre el control en el navegador — sin instalar nada.",
+        },
         footer: {
           tagline: "Un presentador de PDF local-first que controlas desde el teléfono.",
           privacyHeading: "Qué sale de tu dispositivo",
@@ -382,7 +407,7 @@
         ],
       },
       sv: {
-        nav: { features: "Funktioner", connect: "Så ansluter du", about: "Om", download: "Ladda ner" },
+        nav: { features: "Funktioner", connect: "Så ansluter du", about: "Om", download: "Kom igång" },
         about: {
           heading: "Varför Beam finns",
           bodyHtml: "<p>Beam föddes ur ett verkligt problem. När jag förberedde ett föredrag för <a href=\"https://mdevcamp.eu/\" target=\"_blank\" rel=\"noopener\">mdevcamp.eu</a> behövde jag växla mellan bilder och fyra livedemos samtidigt som jag höll koll på mina anteckningar och tiden — och göra det smidigt. Så jag byggde en enkel första version bara för att ta mig igenom föredraget.</p><p>Det fungerade, så jag fortsatte och utvecklade den till det du ser här — stolt byggd med Compose Multiplatform. Sedan slog det mig att andra talare nog vill ha samma sak, så jag bestämde mig för att dela den.</p><p class=\"sig\">— Jackson Mafra (<a href=\"https://github.com/jacksonfdam\" target=\"_blank\" rel=\"noopener\">jacksonfdam</a>)</p>",
@@ -391,12 +416,16 @@
           badge: "Local-first presentationsfjärr",
           title: "Styr hela ditt föredrag från telefonen.",
           sub: "Beam projicerar din exporterade PDF i helskärm och gör telefonen till fjärrkontroll — bläddra bland bilder, rita på bilden live, spotlighta en detalj, kika på dina anteckningar och håll koll på tiden. Allt stannar i ditt eget Wi‑Fi.",
-          flow: "PARKOPPLA · PRESENTERA · ANTECKNA", download: "Ladda ner Beam", watch: "Se demorna",
+          flow: "PARKOPPLA · PRESENTERA · ANTECKNA", download: "Kom igång", watch: "Se demorna",
         },
         demos: { heading: "Se Beam i praktiken", lead: "Korta klipp från den riktiga appen. Byt ut platshållarna mot dina egna inspelningar." },
         features: { heading: "Allt en presentation behöver, inget mer", lead: "Beam presenterar — det skapar inte. Det fokuset gör det snabbt, privat och dödssimpelt." },
         connect: { heading: "Så ansluter du", lead: "Två enheter, ett Wi-Fi-nätverk, en kort PIN. Ingen inloggning, inga parkopplingsservrar." },
-        download: { heading: "Ladda ner Beam", lead: "Skrivbordsappen är presentatör och värd. Mobilappen är fjärrkontrollen. Versioner är på väg." },
+        download: {
+          heading: "Kom igång",
+          lead: "Ingen app-store-build än — och du behöver ingen. Klona repot och kör ./beam: det sätter upp allt, startar webben, kör värden på datorn och installerar fjärrkontrollen direkt på en ansluten telefon. Ingen butik, inget certifikat.",
+          browserNote: "På valfri annan enhet öppnar du bara webbfjärrkontrollen — ingen installation alls.",
+        },
         footer: {
           tagline: "En local-first PDF-presentatör som du styr från telefonen.",
           privacyHeading: "Vad som lämnar din enhet",

@@ -43,7 +43,7 @@ const en = {
     subtitle:
       "Beam projects your exported PDF fullscreen on the big screen and turns your phone into the remote — flip slides, draw on the live slide, spotlight a detail, glance at your speaker notes, and watch the clock. Everything stays on your own Wi‑Fi.",
     flow: "PAIR · PRESENT · ANNOTATE",
-    download: "Download Beam",
+    download: "Get started",
     useBrowserRemote: "Use the browser remote",
   },
   features: {
@@ -73,15 +73,10 @@ const en = {
     preferPost: " pairs with the same session code over a direct peer-to-peer connection.",
   },
   downloads: {
-    heading: "Download Beam",
-    sub: "The desktop app is the presenter and host. The mobile app is the remote. Builds are on the way.",
-    soon: "Soon",
-    notes: {
-      macos: "Apple silicon & Intel",
-      windows: "Windows 10 & 11",
-      linux: "AppImage & .deb",
-      mobile: "The remote app",
-    },
+    heading: "Get started",
+    lead: "No app-store build yet — and you don't need one. Clone the repo and run ./beam: it sets up everything, starts the web, runs the desktop host, and installs the mobile remote straight to a connected phone. No store, no certificate.",
+    browserNote: "On any other device, just open the browser remote — no install at all.",
+    browserCta: "Open the browser remote",
   },
   footer: {
     tagline: "A local-first PDF presenter you drive from your phone.",
@@ -158,7 +153,7 @@ const ptBR: Dict = {
     subtitle:
       "O Beam projeta seu PDF exportado em tela cheia e transforma o celular no controle — passe os slides, desenhe sobre o slide ao vivo, dê destaque a um detalhe, consulte suas notas e acompanhe o tempo. Tudo no seu próprio Wi‑Fi.",
     flow: "PAREAR · APRESENTAR · ANOTAR",
-    download: "Baixar o Beam",
+    download: "Começar",
     useBrowserRemote: "Usar o controle no navegador",
   },
   features: {
@@ -188,15 +183,10 @@ const ptBR: Dict = {
     preferPost: " pareia com o mesmo código de sessão por uma conexão direta peer-to-peer.",
   },
   downloads: {
-    heading: "Baixar o Beam",
-    sub: "O app desktop é o apresentador e host. O app mobile é o controle. As builds estão a caminho.",
-    soon: "Em breve",
-    notes: {
-      macos: "Apple silicon & Intel",
-      windows: "Windows 10 e 11",
-      linux: "AppImage e .deb",
-      mobile: "O app de controle",
-    },
+    heading: "Começar",
+    lead: "Ainda não há build em loja — e você não precisa. Clone o repositório e rode ./beam: ele configura tudo, sobe a web, roda o host no desktop e instala o controle direto num celular conectado. Sem loja, sem certificado.",
+    browserNote: "Em qualquer outro aparelho, é só abrir o controle no navegador — sem instalar nada.",
+    browserCta: "Abrir o controle no navegador",
   },
   footer: {
     tagline: "Um apresentador de PDF local-first que você controla pelo celular.",
@@ -271,7 +261,7 @@ const es: Dict = {
     subtitle:
       "Beam proyecta tu PDF exportado a pantalla completa y convierte tu teléfono en el control — pasa diapositivas, dibuja sobre la diapositiva en vivo, enfoca un detalle, consulta tus notas y vigila el tiempo. Todo en tu propia red Wi‑Fi.",
     flow: "EMPAREJAR · PRESENTAR · ANOTAR",
-    download: "Descargar Beam",
+    download: "Empezar",
     useBrowserRemote: "Usar el control del navegador",
   },
   features: {
@@ -301,15 +291,10 @@ const es: Dict = {
     preferPost: " se empareja con el mismo código de sesión por una conexión directa peer-to-peer.",
   },
   downloads: {
-    heading: "Descargar Beam",
-    sub: "La app de escritorio es el presentador y host. La app móvil es el control. Las versiones están en camino.",
-    soon: "Pronto",
-    notes: {
-      macos: "Apple silicon e Intel",
-      windows: "Windows 10 y 11",
-      linux: "AppImage y .deb",
-      mobile: "La app de control",
-    },
+    heading: "Empezar",
+    lead: "Todavía no hay build en la tienda — y no la necesitas. Clona el repositorio y ejecuta ./beam: configura todo, levanta la web, ejecuta el host en el escritorio e instala el control directamente en un teléfono conectado. Sin tienda, sin certificado.",
+    browserNote: "En cualquier otro dispositivo, solo abre el control en el navegador — sin instalar nada.",
+    browserCta: "Abrir el control del navegador",
   },
   footer: {
     tagline: "Un presentador de PDF local-first que controlas desde el teléfono.",
@@ -384,7 +369,7 @@ const sv: Dict = {
     subtitle:
       "Beam projicerar din exporterade PDF i helskärm och gör telefonen till fjärrkontroll — bläddra bland bilder, rita på bilden live, spotlighta en detalj, kika på dina anteckningar och håll koll på tiden. Allt stannar i ditt eget Wi‑Fi.",
     flow: "PARKOPPLA · PRESENTERA · ANTECKNA",
-    download: "Ladda ner Beam",
+    download: "Kom igång",
     useBrowserRemote: "Använd webbfjärrkontrollen",
   },
   features: {
@@ -414,15 +399,10 @@ const sv: Dict = {
     preferPost: " parkopplas med samma sessionskod via en direkt peer-to-peer-anslutning.",
   },
   downloads: {
-    heading: "Ladda ner Beam",
-    sub: "Skrivbordsappen är presentatör och värd. Mobilappen är fjärrkontrollen. Versioner är på väg.",
-    soon: "Snart",
-    notes: {
-      macos: "Apple silicon & Intel",
-      windows: "Windows 10 & 11",
-      linux: "AppImage & .deb",
-      mobile: "Fjärrkontrollappen",
-    },
+    heading: "Kom igång",
+    lead: "Ingen app-store-build än — och du behöver ingen. Klona repot och kör ./beam: det sätter upp allt, startar webben, kör värden på datorn och installerar fjärrkontrollen direkt på en ansluten telefon. Ingen butik, inget certifikat.",
+    browserNote: "På valfri annan enhet öppnar du bara webbfjärrkontrollen — ingen installation alls.",
+    browserCta: "Öppna webbfjärrkontrollen",
   },
   footer: {
     tagline: "En local-first PDF-presentatör som du styr från telefonen.",

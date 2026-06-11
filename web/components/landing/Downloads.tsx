@@ -1,15 +1,7 @@
 "use client";
 
+import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
-
-// Download targets. Links are placeholders until release artifacts exist (TODO).
-// `noteKey` indexes the localized note in the i18n bundle.
-const targets = [
-  { os: "macOS", noteKey: "macos", href: "#", ready: false },
-  { os: "Windows", noteKey: "windows", href: "#", ready: false },
-  { os: "Linux", noteKey: "linux", href: "#", ready: false },
-  { os: "iOS / Android", noteKey: "mobile", href: "#", ready: false },
-] as const;
 
 export function Downloads() {
   const { t } = useI18n();
@@ -26,28 +18,34 @@ export function Downloads() {
         >
           {t.downloads.heading}
         </h2>
-        <p className="mt-4 max-w-2xl text-white/60">{t.downloads.sub}</p>
+        <p className="mt-4 max-w-2xl text-white/60">{t.downloads.lead}</p>
 
-        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {targets.map((tg) => (
-            <a
-              key={tg.os}
-              href={tg.href}
-              aria-disabled={!tg.ready}
-              className="group rounded-2xl border border-ink-line bg-ink p-6 transition hover:border-beam/50"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold text-white">{tg.os}</span>
-                {!tg.ready && (
-                  <span className="rounded-full border border-ink-line px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/50">
-                    {t.downloads.soon}
-                  </span>
-                )}
-              </div>
-              <p className="mt-2 text-sm text-white/60">{t.downloads.notes[tg.noteKey]}</p>
-            </a>
-          ))}
-        </div>
+        <pre className="mt-6 w-full max-w-xl overflow-x-auto rounded-xl border border-ink-line bg-ink p-4 font-mono text-sm leading-relaxed text-beam-glow">
+          <code>{`git clone https://github.com/jacksonfdam/Beam.git
+cd Beam
+./beam`}</code>
+        </pre>
+
+        <p className="mt-6 max-w-2xl text-sm text-white/55">
+          {t.downloads.browserNote}{" "}
+          <Link
+            href="/remote"
+            className="text-beam-glow underline underline-offset-4 hover:text-beam-bright"
+          >
+            {t.downloads.browserCta}
+          </Link>
+        </p>
+
+        <p className="mt-3 text-sm text-white/45">
+          <a
+            href="https://github.com/jacksonfdam/Beam"
+            target="_blank"
+            rel="noopener"
+            className="underline underline-offset-4 hover:text-white/70"
+          >
+            github.com/jacksonfdam/Beam
+          </a>
+        </p>
       </div>
     </section>
   );
