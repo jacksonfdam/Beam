@@ -38,11 +38,11 @@ export const LOCALE_NAMES: Record<Locale, string> = {
 const en = {
   nav: { features: "Features", howToConnect: "How to connect", openRemote: "Open remote" },
   hero: {
-    badge: "Local-first presenter",
-    title: "Turn any exported PDF into a flawless fullscreen presentation",
+    badge: "Local-first presenter remote",
+    title: "Run your whole talk from your phone.",
     subtitle:
-      "Keynote, PowerPoint, Canva, Figma — export to PDF and Beam renders it exactly as designed. No broken fonts, no layout surprises. Control it all from your phone.",
-    flow: "OPEN → PRESENT → DONE",
+      "Beam projects your exported PDF fullscreen on the big screen and turns your phone into the remote — flip slides, draw on the live slide, spotlight a detail, glance at your speaker notes, and watch the clock. Everything stays on your own Wi‑Fi.",
+    flow: "PAIR · PRESENT · ANNOTATE",
     download: "Download Beam",
     useBrowserRemote: "Use the browser remote",
   },
@@ -84,7 +84,7 @@ const en = {
     },
   },
   footer: {
-    tagline: "A local-first PDF presenter. Open → Present → Done.",
+    tagline: "A local-first PDF presenter you drive from your phone.",
     whatHeading: "What leaves your device",
     whatBody:
       "Nothing of substance. Slides, speaker notes, navigation, timer, and ink stay on your local network — peer-to-peer between your devices. The browser remote uses a server only to exchange the initial WebRTC handshake (a session code and connection details); once paired, all data is direct. No accounts, no content storage, no telemetry.",
@@ -153,11 +153,11 @@ export type Dict = typeof en;
 const ptBR: Dict = {
   nav: { features: "Recursos", howToConnect: "Como conectar", openRemote: "Abrir controle" },
   hero: {
-    badge: "Apresentador local-first",
-    title: "Transforme qualquer PDF exportado numa apresentação impecável em tela cheia",
+    badge: "Controle de apresentação local-first",
+    title: "Conduza sua palestra inteira pelo celular.",
     subtitle:
-      "Keynote, PowerPoint, Canva, Figma — exporte para PDF e o Beam renderiza exatamente como foi desenhado. Sem fontes quebradas, sem surpresas de layout. Controle tudo pelo seu celular.",
-    flow: "ABRIR → APRESENTAR → PRONTO",
+      "O Beam projeta seu PDF exportado em tela cheia e transforma o celular no controle — passe os slides, desenhe sobre o slide ao vivo, dê destaque a um detalhe, consulte suas notas e acompanhe o tempo. Tudo no seu próprio Wi‑Fi.",
+    flow: "PAREAR · APRESENTAR · ANOTAR",
     download: "Baixar o Beam",
     useBrowserRemote: "Usar o controle no navegador",
   },
@@ -199,7 +199,7 @@ const ptBR: Dict = {
     },
   },
   footer: {
-    tagline: "Um apresentador de PDF local-first. Abrir → Apresentar → Pronto.",
+    tagline: "Um apresentador de PDF local-first que você controla pelo celular.",
     whatHeading: "O que sai do seu dispositivo",
     whatBody:
       "Nada de substancial. Slides, notas, navegação, cronômetro e tinta ficam na sua rede local — peer-to-peer entre seus dispositivos. O controle no navegador usa um servidor apenas para trocar o handshake inicial do WebRTC (um código de sessão e detalhes de conexão); uma vez pareado, todos os dados são diretos. Sem contas, sem armazenamento de conteúdo, sem telemetria.",
@@ -266,11 +266,11 @@ const ptBR: Dict = {
 const es: Dict = {
   nav: { features: "Funciones", howToConnect: "Cómo conectar", openRemote: "Abrir control" },
   hero: {
-    badge: "Presentador local-first",
-    title: "Convierte cualquier PDF exportado en una presentación impecable a pantalla completa",
+    badge: "Control de presentación local-first",
+    title: "Controla toda tu charla desde el teléfono.",
     subtitle:
-      "Keynote, PowerPoint, Canva, Figma — exporta a PDF y Beam lo renderiza exactamente como lo diseñaste. Sin fuentes rotas, sin sorpresas de diseño. Contrólalo todo desde tu teléfono.",
-    flow: "ABRIR → PRESENTAR → LISTO",
+      "Beam proyecta tu PDF exportado a pantalla completa y convierte tu teléfono en el control — pasa diapositivas, dibuja sobre la diapositiva en vivo, enfoca un detalle, consulta tus notas y vigila el tiempo. Todo en tu propia red Wi‑Fi.",
+    flow: "EMPAREJAR · PRESENTAR · ANOTAR",
     download: "Descargar Beam",
     useBrowserRemote: "Usar el control del navegador",
   },
@@ -312,7 +312,7 @@ const es: Dict = {
     },
   },
   footer: {
-    tagline: "Un presentador de PDF local-first. Abrir → Presentar → Listo.",
+    tagline: "Un presentador de PDF local-first que controlas desde el teléfono.",
     whatHeading: "Qué sale de tu dispositivo",
     whatBody:
       "Nada sustancial. Las diapositivas, notas, navegación, cronómetro y tinta se quedan en tu red local — peer-to-peer entre tus dispositivos. El control del navegador usa un servidor solo para intercambiar el handshake inicial de WebRTC (un código de sesión y detalles de conexión); una vez emparejado, todos los datos van directos. Sin cuentas, sin almacenamiento de contenido, sin telemetría.",
@@ -379,11 +379,11 @@ const es: Dict = {
 const sv: Dict = {
   nav: { features: "Funktioner", howToConnect: "Så ansluter du", openRemote: "Öppna fjärrkontroll" },
   hero: {
-    badge: "Local-first-presentatör",
-    title: "Förvandla vilken exporterad PDF som helst till en felfri helskärmspresentation",
+    badge: "Local-first presentationsfjärr",
+    title: "Styr hela ditt föredrag från telefonen.",
     subtitle:
-      "Keynote, PowerPoint, Canva, Figma — exportera till PDF och Beam återger den precis som den designats. Inga trasiga typsnitt, inga layoutöverraskningar. Styr allt från telefonen.",
-    flow: "ÖPPNA → PRESENTERA → KLAR",
+      "Beam projicerar din exporterade PDF i helskärm och gör telefonen till fjärrkontroll — bläddra bland bilder, rita på bilden live, spotlighta en detalj, kika på dina anteckningar och håll koll på tiden. Allt stannar i ditt eget Wi‑Fi.",
+    flow: "PARKOPPLA · PRESENTERA · ANTECKNA",
     download: "Ladda ner Beam",
     useBrowserRemote: "Använd webbfjärrkontrollen",
   },
@@ -425,7 +425,7 @@ const sv: Dict = {
     },
   },
   footer: {
-    tagline: "En local-first PDF-presentatör. Öppna → Presentera → Klar.",
+    tagline: "En local-first PDF-presentatör som du styr från telefonen.",
     whatHeading: "Vad som lämnar din enhet",
     whatBody:
       "Inget väsentligt. Bilder, talaranteckningar, navigering, timer och bläck stannar i ditt lokala nätverk — peer-to-peer mellan dina enheter. Webbfjärrkontrollen använder en server endast för att utbyta den inledande WebRTC-handskakningen (en sessionskod och anslutningsdetaljer); väl parkopplad går all data direkt. Inga konton, ingen innehållslagring, ingen telemetri.",

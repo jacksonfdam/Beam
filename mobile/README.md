@@ -1,9 +1,9 @@
 # Beam — native apps
 
-Beam turns any exported PDF (Keynote, PowerPoint, Canva, Figma) into a flawless
-fullscreen presentation, controlled from a phone. Local-first:
-no accounts, no cloud storage of user content, devices discover and talk to each
-other directly over the LAN. **Open → Present → Done.**
+Beam projects an exported PDF fullscreen from a computer and turns your phone
+into the remote — slides, live ink, spotlight, speaker notes, and a shared
+timer. Local-first: no accounts, no cloud storage of user content; devices
+discover and talk to each other directly over the LAN.
 
 ## Platforms & roles
 

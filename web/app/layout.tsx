@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { I18nProvider } from "@/lib/i18n";
 
-const title = "Beam — Turn any PDF into a flawless presentation";
+const title = "Beam — present a PDF, controlled from your phone";
 const description =
-  "Beam turns any exported PDF into a fullscreen presentation, controlled from your phone. Local-first, no accounts, no cloud. Open → Present → Done.";
+  "Beam projects an exported PDF fullscreen from your computer and turns your phone into the remote — navigate, draw live, spotlight, read your notes, and time your talk. Local-first, peer-to-peer over your Wi‑Fi.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://beam.local"),

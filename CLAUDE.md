@@ -4,8 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What Beam is
 
-Beam turns an exported PDF (Keynote, PowerPoint, Canva, Figma) into a fullscreen presentation
-controlled from a phone. **Local-first**: no accounts, no cloud storage of user
+Beam projects an exported PDF fullscreen from a computer and turns a phone (or browser) into the
+remote — slides, live ink, spotlight, speaker notes, and a shared timer. **Local-first**: no accounts, no cloud storage of user
 content, no telemetry. Devices discover and talk to each other directly over the LAN. The *only*
 thing that may ever touch a server is the WebRTC signaling handshake for the optional browser
 remote — never slide content, notes, or ink. This constraint is load-bearing: do not introduce

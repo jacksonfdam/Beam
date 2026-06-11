@@ -1,8 +1,9 @@
 # Beam
 
-Turn any exported PDF (Keynote, PowerPoint, Canva, Figma) into a flawless
-fullscreen presentation, controlled from your phone. No broken fonts, no layout
-surprises — the PDF renders exactly as designed. **Open → Present → Done.**
+Beam projects an exported PDF fullscreen from your computer and turns your phone
+into the remote — flip slides, draw on the live slide, spotlight a detail, read
+your speaker notes, and time your talk. It renders the PDF itself, so the deck
+looks exactly as you designed it, on any machine.
 
 The product stance is **local-first**: no accounts, no cloud
 storage of user content, no telemetry. Devices discover and talk to each other
